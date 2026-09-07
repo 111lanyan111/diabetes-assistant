@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人中心 - 糖尿病预治智能助手</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar"></nav>
+
+  <div class="container">
+    <div class="grid" style="grid-template-columns: 280px 1fr; gap:24px">
+      <!-- 侧边栏 -->
+      <div>
+        <div class="card" style="text-align:center">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 12px;color:white;font-weight:700" id="userAvatar">U</div>
+          <h3 id="userName" style="font-size:18px;margin-bottom:4px">用户</h3>
+          <p style="font-size:13px;color:var(--text-light)" id="userPhone">--</p>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-around;text-align:center">
+              <div>
+                <div style="font-size:20px;font-weight:700;color:var(--primary)" id="checkinDays">0</div>
+                <div style="font-size:12px;color:var(--text-light)">打卡天数</div>
+              </div>
+              <div>
+                <div style="font-size:20px;font-weight:700;color:var(--secondary)" id="planCount">0</div>
+                <div style="font-size:12px;color:var(--text-light)">健康方案</div>
+              </div>
+              <div>
+                <div style="font-size:20px;font-weight:700;color:var(--accent)" id="favCount">0</div>
+                <div style="font-size:12px;color:var(--text-light)">收藏</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card" style="padding:8px">
+          <div class="menu-item active" onclick="switchSection('info')" style="padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500">
+            <span>👤</span> 个人信息
+          </div>
+          <div class="menu-item" onclick="switchSection('risk')" style="padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500">
+            <span>📊</span> 风险评估
+          </div>
+          <div class="menu-item" onclick="switchSection('records')" style="padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500">
+            <span>📋</span> 评估记录
+          </div>
+          <div class="menu-item" onclick="switchSection('favorites')" style="padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500">
+            <span>⭐</span> 我的收藏
+          </div>
+          <div class="menu-item" onclick="logout()" style="padding:12px 16px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:var(--danger)">
+            <span>🚪</span> 退出登录
+          </div>
+        </div>
+      </div>
+
+      <!-- 主内容区 -->
+      <div>
+        <!-- 个人信息 -->
+        <div class="section" id="section-info">
+          <div class="card">
+            <div class="card-title"><span class="icon">👤</span>个人信息管理</div>
+            <form onsubmit="return saveProfile(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">姓名</label>
+                  <input type="text" class="form-input" id="profileName" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">性别</label>
+                  <select class="form-select" id="profileGender">
+                    <option value="">请选择</option>
+                    <option value="male">男</option>
+                    <option value="female">女</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">年龄</label>
+                  <input type="number" class="form-input" id="profileAge" placeholder="请输入年龄" min="1" max="120">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">身高 (cm)</label>
+                  <input type="number" class="form-input" id="profileHeight" placeholder="请输入身高" min="50" max="250">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">体重 (kg)</label>
+                  <input type="number" class="form-input" id="profileWeight" placeholder="请输入体重" min="20" max="300" step="0.1">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">糖尿病家族史</label>
+                  <select class="form-select" id="profileFamily">
+                    <option value="no">无</option>
+                    <option value="yes">有</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">血压状况</label>
+                  <select class="form-select" id="profileBP">
+                    <option value="normal">正常</option>
+                    <option value="high">高血压</option>
+                    <option value="borderline">临界高血压</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">运动频率</label>
+                  <select class="form-select" id="profileExercise">
+                    <option value="regular">经常运动（每周3次以上）</option>
+                    <option value="sometimes">偶尔运动（每周1-2次）</option>
+                    <option value="rare">很少运动</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">饮食习惯</label>
+                <select class="form-select" id="profileDiet">
+                  <option value="healthy">健康均衡</option>
+                  <option value="normal">一般</option>
+                  <option value="unhealthy">高糖高脂</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">吸烟情况</label>
+                <select class="form-select" id="profileSmoke">
+                  <option value="no">不吸烟</option>
+                  <option value="yes">吸烟</option>
+                  <option value="quit">已戒烟</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">保存信息</button>
+              <button type="button" class="btn btn-outline" style="margin-left:10px" onclick="window.location.href='risk.html'">去做风险评估 →</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- 风险评估结果 -->
+        <div class="section" id="section-risk" style="display:none">
+          <div class="card">
+            <div class="card-title"><span class="icon">📊</span>糖尿病风险评估</div>
+            <div id="riskResult">
+              <div style="text-align:center;padding:40px 0">
+                <div style="font-size:60px;margin-bottom:16px">📋</div>
+                <h3 style="margin-bottom:10px">还没有评估记录</h3>
+                <p style="color:var(--text-light);margin-bottom:20px">填写个人信息后，AI将为您评估糖尿病风险</p>
+                <button class="btn btn-primary btn-lg" onclick="window.location.href='risk.html'">开始评估</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 评估记录 -->
+        <div class="section" id="section-records" style="display:none">
+          <div class="card">
+            <div class="card-title"><span class="icon">📋</span>评估记录</div>
+            <div id="recordsList">
+              <div style="text-align:center;padding:40px 0;color:var(--text-light)">
+                <div style="font-size:48px;margin-bottom:12px">📝</div>
+                暂无评估记录
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 我的收藏 -->
+        <div class="section" id="section-favorites" style="display:none">
+          <div class="card">
+            <div class="card-title"><span class="icon">⭐</span>我的收藏</div>
+            <div id="favoritesList" class="grid grid-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer"></footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    Utils.initPage('profile.html');
+    
+    // 检查登录
+    if (!Storage.getCurrentUser()) {
+      Utils.toast('请先登录', 'warning');
+      setTimeout(() => window.location.href = 'login.html', 1000);
+    }
+
+    // 加载用户信息
+    function loadUserInfo() {
+      const user = Storage.getCurrentUser();
+      if (user) {
+        document.getElementById('userName').textContent = user.username || '用户';
+        document.getElementById('userPhone').textContent = user.phone || '--';
+        document.getElementById('userAvatar').textContent = (user.username || 'U').charAt(0).toUpperCase();
+      }
+      
+      const profile = Storage.get('userProfile') || {};
+      document.getElementById('profileName').value = profile.name || '';
+      document.getElementById('profileGender').value = profile.gender || '';
+      document.getElementById('profileAge').value = profile.age || '';
+      document.getElementById('profileHeight').value = profile.height || '';
+      document.getElementById('profileWeight').value = profile.weight || '';
+      document.getElementById('profileFamily').value = profile.familyHistory || 'no';
+      document.getElementById('profileBP').value = profile.bloodPressure || 'normal';
+      document.getElementById('profileExercise').value = profile.exercise || 'regular';
+      document.getElementById('profileDiet').value = profile.diet || 'normal';
+      document.getElementById('profileSmoke').value = profile.smoke || 'no';
+      
+      // 统计数据
+      document.getElementById('checkinDays').textContent = Storage.getCheckins().length;
+      document.getElementById('planCount').textContent = Storage.get('plans') ? Storage.get('plans').length : 0;
+      document.getElementById('favCount').textContent = Storage.getFavorites().length;
+    }
+
+    // 保存个人信息
+    function saveProfile(e) {
+      e.preventDefault();
+      const profile = {
+        name: document.getElementById('profileName').value,
+        gender: document.getElementById('profileGender').value,
+        age: parseInt(document.getElementById('profileAge').value) || 0,
+        height: parseFloat(document.getElementById('profileHeight').value) || 0,
+        weight: parseFloat(document.getElementById('profileWeight').value) || 0,
+        familyHistory: document.getElementById('profileFamily').value,
+        bloodPressure: document.getElementById('profileBP').value,
+        exercise: document.getElementById('profileExercise').value,
+        diet: document.getElementById('profileDiet').value,
+        smoke: document.getElementById('profileSmoke').value,
+        bmi: 0
+      };
+      
+      if (profile.height && profile.weight) {
+        profile.bmi = parseFloat(Utils.calcBMI(profile.height, profile.weight));
+      }
+      
+      Storage.set('userProfile', profile);
+      Utils.toast('个人信息保存成功！', 'success');
+      
+      // 自动进行风险评估
+      if (profile.age && profile.bmi) {
+        const result = MockData.predictRisk(profile);
+        const records = Storage.get('riskRecords') || [];
+        records.unshift({ ...result, profile: { ...profile }, date: new Date().toISOString() });
+        Storage.set('riskRecords', records);
+        renderRiskResult(result);
+        renderRecords();
+      }
+      return false;
+    }
+
+    // 渲染风险结果
+    function renderRiskResult(result) {
+      const colors = { green: '#10b981', orange: '#f59e0b', red: '#ef4444' };
+      document.getElementById('riskResult').innerHTML = `
+        <div style="text-align:center;padding:20px 0">
+          <div style="width:140px;height:140px;border-radius:50%;border:8px solid ${colors[result.color]};display:flex;align-items:center;justify-content:center;margin:0 auto 20px;flex-direction:column">
+            <div style="font-size:36px;font-weight:700;color:${colors[result.color]}">${result.score}</div>
+            <div style="font-size:12px;color:var(--text-light)">风险分值</div>
+          </div>
+          <span class="tag tag-${result.color}" style="font-size:16px;padding:6px 16px">${result.level}</span>
+          <p style="margin-top:20px;font-size:15px;line-height:1.8;color:var(--text)">${result.advice}</p>
+          <div style="margin-top:20px;display:flex;gap:12px;justify-content:center">
+            <button class="btn btn-primary" onclick="window.location.href='plan.html'">获取健康方案</button>
+            <button class="btn btn-outline" onclick="window.location.href='doctor.html'">咨询医师</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // 渲染评估记录
+    function renderRecords() {
+      const records = Storage.get('riskRecords') || [];
+      const list = document.getElementById('recordsList');
+      if (records.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-light)"><div style="font-size:48px;margin-bottom:12px">📝</div>暂无评估记录</div>';
+        return;
+      }
+      list.innerHTML = '<table class="data-table"><thead><tr><th>评估时间</th><th>年龄</th><th>BMI</th><th>风险分值</th><th>风险等级</th></tr></thead><tbody>' +
+        records.map(r => `
+          <tr>
+            <td>${Utils.formatDate(r.date, 'YYYY-MM-DD HH:mm')}</td>
+            <td>${r.profile?.age || '-'}</td>
+            <td>${r.profile?.bmi || '-'}</td>
+            <td><strong>${r.score}</strong></td>
+            <td><span class="tag tag-${r.color}">${r.level}</span></td>
+          </tr>
+        `).join('') + '</tbody></table>';
+    }
+
+    // 渲染收藏
+    function renderFavorites() {
+      const favs = Storage.getFavorites();
+      const list = document.getElementById('favoritesList');
+      if (favs.length === 0) {
+        list.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:40px 0;color:var(--text-light)"><div style="font-size:48px;margin-bottom:12px">⭐</div>暂无收藏文章</div>';
+        return;
+      }
+      list.innerHTML = favs.map(a => `
+        <div class="article-card" onclick="window.location.href='news.html'">
+          <div class="article-cover" style="background:${a.color}20">${a.icon}</div>
+          <div class="article-body">
+            <h3>${a.title}</h3>
+            <p>${a.summary}</p>
+            <div class="article-meta">
+              <span class="tag tag-blue">${a.category}</span>
+              <span>${a.date}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 切换section
+    function switchSection(name) {
+      document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      document.getElementById('section-' + name).style.display = 'block';
+      event.target.closest('.menu-item').classList.add('active');
+      
+      if (name === 'risk') {
+        const records = Storage.get('riskRecords') || [];
+        if (records.length > 0) renderRiskResult(records[0]);
+      }
+      if (name === 'records') renderRecords();
+      if (name === 'favorites') renderFavorites();
+    }
+
+    // 退出登录
+    function logout() {
+      Storage.logout();
+      Utils.toast('已退出登录', 'info');
+      setTimeout(() => window.location.href = 'login.html', 1000);
+    }
+
+    // 初始化
+    loadUserInfo();
+  </script>
+</body>
+</html>

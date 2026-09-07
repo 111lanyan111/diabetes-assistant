@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment and config
+.env
+.env.local
+.env.*.local
+
+# Logs and debug
+*.log
+npm-debug.log*
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Build output
+dist/
+build/
+out/
+
+# Cline settings (AI assistant config)
+.cline/
+
+# OS files
+desktop.ini

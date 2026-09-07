@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据统计 - 糖尿病预治智能助手</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="navbar"></nav>
+  
+  <div class="container">
+    <div class="page-header">
+      <h1>📈 健康数据统计</h1>
+      <p style="color:var(--text-light);margin-top:8px">血糖趋势、健康指标可视化分析</p>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="grid grid-4" style="margin-bottom:24px">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <p style="font-size:13px;color:var(--text-light)">平均空腹血糖</p>
+            <h2 style="font-size:28px;color:#2563eb;margin-top:4px" id="avgFasting">--</h2>
+            <p style="font-size:12px;color:var(--text-light)" id="fastingStatus">--</p>
+          </div>
+          <div style="font-size:36px">🩸</div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <p style="font-size:13px;color:var(--text-light)">平均餐后血糖</p>
+            <h2 style="font-size:28px;color:#7c3aed;margin-top:4px" id="avgPostprandial">--</h2>
+            <p style="font-size:12px;color:var(--text-light)" id="postprandialStatus">--</p>
+          </div>
+          <div style="font-size:36px">🍚</div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <p style="font-size:13px;color:var(--text-light)">平均体重</p>
+            <h2 style="font-size:28px;color:#059669;margin-top:4px" id="avgWeight">--</h2>
+            <p style="font-size:12px;color:var(--text-light)" id="weightStatus">--</p>
+          </div>
+          <div style="font-size:36px">⚖️</div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <p style="font-size:13px;color:var(--text-light)">打卡天数</p>
+            <h2 style="font-size:28px;color:#d97706;margin-top:4px" id="checkinDays">--</h2>
+            <p style="font-size:12px;color:var(--text-light)" id="checkinRate">--</p>
+          </div>
+          <div style="font-size:36px">✅</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 时间范围选择 -->
+    <div class="card" style="margin-bottom:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="font-size:16px">📊 血糖趋势分析</h3>
+        <div class="tab-group" id="timeRange">
+          <button class="tab-btn active" data-range="7">近7天</button>
+          <button class="tab-btn" data-range="14">近14天</button>
+          <button class="tab-btn" data-range="30">近30天</button>
+        </div>
+      </div>
+      <div style="height:350px;position:relative">
+        <canvas id="bloodSugarChart"></canvas>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-bottom:24px">
+      <!-- 血糖分布饼图 -->
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:16px">🥧 血糖达标分布</h3>
+        <div style="height:300px;position:relative">
+          <canvas id="distributionChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- 体重趋势图 -->
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:16px">⚖️ 体重变化趋势</h3>
+        <div style="height:300px;position:relative">
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 运动与饮食统计 -->
+    <div class="grid grid-2" style="margin-bottom:24px">
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:16px">🏃 运动统计</h3>
+        <div style="height:280px;position:relative">
+          <canvas id="exerciseChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:16px">🥗 饮食健康度</h3>
+        <div style="height:280px;position:relative">
+          <canvas id="dietChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI数据分析 -->
+    <div class="card" style="margin-bottom:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="font-size:16px">🤖 AI智能数据分析</h3>
+        <button class="btn btn-primary btn-sm" onclick="generateAIAnalysis()">
+          <span id="aiBtnText">生成分析报告</span>
+        </button>
+      </div>
+      <div id="aiAnalysisResult" style="display:none">
+        <div class="alert alert-info" style="white-space:pre-wrap;line-height:1.8" id="aiAnalysisContent"></div>
+      </div>
+      <div id="aiAnalysisEmpty" style="text-align:center;padding:40px;color:var(--text-light)">
+        <div style="font-size:48px;margin-bottom:12px">📊</div>
+        <p>点击上方按钮，AI将分析您的健康数据并给出专业建议</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"></div>
+
+  <script src="js/common.js"></script>
+  <script>
+    Utils.renderNav('statistics.html');
+    Utils.renderFooter();
+
+    let bloodSugarChart, distributionChart, weightChart, exerciseChart, dietChart;
+    let currentRange = 7;
+
+    // 时间范围切换
+    document.querySelectorAll('#timeRange .tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#timeRange .tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentRange = parseInt(this.dataset.range);
+        loadStatistics();
+      });
+    });
+
+    // 加载统计数据
+    function loadStatistics() {
+      const records = Storage.getCheckins() || [];
+      const filtered = records.slice(0, currentRange);
+      
+      // 计算统计数据
+      const fastingValues = filtered.filter(r => r.bloodSugar).map(r => parseFloat(r.bloodSugar));
+      const postprandialValues = filtered.filter(r => r.postprandial).map(r => parseFloat(r.postprandial));
+      const weightValues = filtered.filter(r => r.weight).map(r => parseFloat(r.weight));
+      
+      const avgFasting = fastingValues.length > 0 ? (fastingValues.reduce((a,b) => a+b, 0) / fastingValues.length).toFixed(1) : '--';
+      const avgPostprandial = postprandialValues.length > 0 ? (postprandialValues.reduce((a,b) => a+b, 0) / postprandialValues.length).toFixed(1) : '--';
+      const avgWeight = weightValues.length > 0 ? (weightValues.reduce((a,b) => a+b, 0) / weightValues.length).toFixed(1) : '--';
+      
+      document.getElementById('avgFasting').textContent = avgFasting !== '--' ? avgFasting + ' mmol/L' : '--';
+      document.getElementById('avgPostprandial').textContent = avgPostprandial !== '--' ? avgPostprandial + ' mmol/L' : '--';
+      document.getElementById('avgWeight').textContent = avgWeight !== '--' ? avgWeight + ' kg' : '--';
+      document.getElementById('checkinDays').textContent = filtered.length + ' 天';
+      
+      // 状态判断
+      if (avgFasting !== '--') {
+        const f = parseFloat(avgFasting);
+        document.getElementById('fastingStatus').textContent = f < 6.1 ? '✓ 正常' : f < 7.0 ? '⚠ 偏高' : '✗ 超标';
+        document.getElementById('fastingStatus').style.color = f < 6.1 ? '#10b981' : f < 7.0 ? '#f59e0b' : '#ef4444';
+      }
+      if (avgPostprandial !== '--') {
+        const p = parseFloat(avgPostprandial);
+        document.getElementById('postprandialStatus').textContent = p < 7.8 ? '✓ 正常' : p < 11.1 ? '⚠ 偏高' : '✗ 超标';
+        document.getElementById('postprandialStatus').style.color = p < 7.8 ? '#10b981' : p < 11.1 ? '#f59e0b' : '#ef4444';
+      }
+      document.getElementById('checkinRate').textContent = '近' + currentRange + '天';
+      
+      // 准备图表数据
+      const labels = filtered.map(r => {
+        const d = new Date(r.date || r.createdAt);
+        return (d.getMonth()+1) + '/' + d.getDate();
+      }).reverse();
+      
+      const fastingData = filtered.map(r => r.bloodSugar || null).reverse();
+      const postprandialData = filtered.map(r => r.postprandial || null).reverse();
+      const weightData = filtered.map(r => r.weight || null).reverse();
+      
+      // 渲染图表
+      renderBloodSugarChart(labels, fastingData, postprandialData);
+      renderDistributionChart(fastingValues, postprandialValues);
+      renderWeightChart(labels, weightData);
+      renderExerciseChart(filtered);
+      renderDietChart(filtered);
+    }
+
+    // 血糖趋势图
+    function renderBloodSugarChart(labels, fasting, postprandial) {
+      const ctx = document.getElementById('bloodSugarChart').getContext('2d');
+      if (bloodSugarChart) bloodSugarChart.destroy();
+      
+      bloodSugarChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '空腹血糖',
+              data: fasting,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              fill: true,
+              tension: 0.4,
+              pointRadius: 4,
+              pointHoverRadius: 6
+            },
+            {
+              label: '餐后血糖',
+              data: postprandial,
+              borderColor: '#7c3aed',
+              backgroundColor: 'rgba(124, 58, 237, 0.1)',
+              fill: true,
+              tension: 0.4,
+              pointRadius: 4,
+              pointHoverRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top' },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              title: { display: true, text: '血糖 (mmol/L)' },
+              grid: { color: 'rgba(0,0,0,0.05)' }
+            },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // 血糖分布饼图
+    function renderDistributionChart(fasting, postprandial) {
+      const ctx = document.getElementById('distributionChart').getContext('2d');
+      if (distributionChart) distributionChart.destroy();
+      
+      let normal = 0, high = 0, veryHigh = 0;
+      fasting.forEach(v => {
+        if (v < 6.1) normal++;
+        else if (v < 7.0) high++;
+        else veryHigh++;
+      });
+      
+      distributionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['正常 (<6.1)', '偏高 (6.1-7.0)', '超标 (>7.0)'],
+          datasets: [{
+            data: [normal, high, veryHigh],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+
+    // 体重趋势图
+    function renderWeightChart(labels, data) {
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      if (weightChart) weightChart.destroy();
+      
+      weightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '体重 (kg)',
+            data: data,
+            borderColor: '#059669',
+            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: false, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // 运动统计柱状图
+    function renderExerciseChart(records) {
+      const ctx = document.getElementById('exerciseChart').getContext('2d');
+      if (exerciseChart) exerciseChart.destroy();
+      
+      const labels = records.map(r => {
+        const d = new Date(r.date || r.createdAt);
+        return (d.getMonth()+1) + '/' + d.getDate();
+      }).reverse();
+      const data = records.map(r => r.exercise || 0).reverse();
+      
+      exerciseChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '运动时长 (分钟)',
+            data: data,
+            backgroundColor: 'rgba(37, 99, 235, 0.7)',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // 饮食健康度雷达图
+    function renderDietChart(records) {
+      const ctx = document.getElementById('dietChart').getContext('2d');
+      if (dietChart) dietChart.destroy();
+      
+      const good = records.filter(r => r.diet === 'good').length;
+      const normal = records.filter(r => r.diet === 'normal').length;
+      const poor = records.filter(r => r.diet === 'poor').length;
+      const total = records.length || 1;
+      
+      dietChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['饮食规律', '营养均衡', '控糖效果', '膳食纤维', '低脂饮食', '水分摄入'],
+          datasets: [{
+            label: '饮食健康度',
+            data: [
+              Math.round((good/total)*100),
+              Math.round((good/total)*80 + (normal/total)*50),
+              Math.round((good/total)*90),
+              Math.round((good/total)*70),
+              Math.round((good/total)*85),
+              Math.round((good/total)*75)
+            ],
+            backgroundColor: 'rgba(124, 58, 237, 0.2)',
+            borderColor: '#7c3aed',
+            pointBackgroundColor: '#7c3aed'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { stepSize: 20 }
+            }
+          }
+        }
+      });
+    }
+
+    // AI生成数据分析
+    async function generateAIAnalysis() {
+      const records = Storage.getCheckins() || [];
+      if (records.length === 0) {
+        Utils.toast('暂无打卡数据可供分析', 'warning');
+        return;
+      }
+      
+      const btn = document.getElementById('aiBtnText');
+      btn.innerHTML = '<span class="loading"></span> 分析中...';
+      
+      const fastingValues = records.filter(r => r.bloodSugar).map(r => r.bloodSugar);
+      const avgFasting = fastingValues.length > 0 ? (fastingValues.reduce((a,b) => parseFloat(a)+parseFloat(b), 0) / fastingValues.length).toFixed(1) : '--';
+      const exerciseDays = records.filter(r => r.exercise > 0).length;
+      const goodDietDays = records.filter(r => r.diet === 'good').length;
+      
+      try {
+        const result = await DifyAPI.runWorkflow({
+          type: 'checkin_analysis',
+          days: records.length,
+          avgFasting: avgFasting,
+          avgPostprandial: '--',
+          avgWeight: '--',
+          checkinDays: records.length
+        });
+        
+        if (result && result.result) {
+          document.getElementById('aiAnalysisContent').textContent = result.result;
+          document.getElementById('aiAnalysisResult').style.display = 'block';
+          document.getElementById('aiAnalysisEmpty').style.display = 'none';
+        }
+      } catch (error) {
+        Utils.toast('AI分析失败，请稍后重试', 'error');
+      }
+      
+      btn.textContent = '重新生成';
+    }
+
+    // 初始化
+    loadStatistics();
+  </script>
+</body>
+</html>

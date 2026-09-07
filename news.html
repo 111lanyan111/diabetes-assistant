@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>健康资讯 - 糖尿病预治智能助手</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+    }
+    .filter-btn {
+      padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+      background: white; cursor: pointer; font-size: 13px; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .article-detail { display: none; }
+    .article-detail.active { display: block; }
+  </style>
+</head>
+<body>
+  <nav class="navbar"></nav>
+
+  <div class="container">
+    <!-- 文章列表 -->
+    <div id="articleList">
+      <div class="card">
+        <div class="card-title" style="justify-content:space-between">
+          <span><span class="icon">📰</span>健康资讯</span>
+          <button class="btn btn-primary btn-sm" onclick="generateNews()">
+            <span id="genNewsText">AI生成资讯</span>
+          </button>
+        </div>
+        
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterArticles('all', this)">全部</button>
+          <button class="filter-btn" onclick="filterArticles('饮食管理', this)">🥗 饮食管理</button>
+          <button class="filter-btn" onclick="filterArticles('运动指导', this)">🏃 运动指导</button>
+          <button class="filter-btn" onclick="filterArticles('疾病科普', this)">📚 疾病科普</button>
+          <button class="filter-btn" onclick="filterArticles('监测指导', this)">🩸 监测指导</button>
+          <button class="filter-btn" onclick="filterArticles('并发症', this)">⚠️ 并发症</button>
+          <button class="filter-btn" onclick="filterArticles('用药指导', this)">💉 用药指导</button>
+        </div>
+        
+        <div class="grid grid-3" id="articlesGrid"></div>
+      </div>
+    </div>
+
+    <!-- 文章详情 -->
+    <div id="articleDetail" class="article-detail">
+      <div class="card">
+        <button class="btn btn-outline btn-sm" onclick="backToList()" style="margin-bottom:16px">← 返回列表</button>
+        <div id="detailContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer"></footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    Utils.initPage('news.html');
+    
+    let currentFilter = 'all';
+    let articles = [...MockData.articles];
+
+    // 渲染文章列表
+    function renderArticles() {
+      const grid = document.getElementById('articlesGrid');
+      const filtered = currentFilter === 'all' ? articles : articles.filter(a => a.category === currentFilter);
+      
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div style="grid-column:span 3;text-align:center;padding:40px;color:var(--text-light)">暂无相关文章</div>';
+        return;
+      }
+      
+      grid.innerHTML = filtered.map(article => `
+        <div class="article-card" onclick="showArticle(${article.id})">
+          <div class="article-cover" style="background:${article.color}20">${article.icon}</div>
+          <div class="article-body">
+            <span class="tag tag-blue" style="margin-bottom:8px">${article.category}</span>
+            <h3>${article.title}</h3>
+            <p>${article.summary}</p>
+            <div class="article-meta">
+              <span>📅 ${article.date}</span>
+              <span>👁 ${article.views}</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn btn-sm ${Storage.isFavorite(article.id) ? 'btn-secondary' : 'btn-outline'}" onclick="event.stopPropagation();toggleFav(${article.id}, this)">
+                ${Storage.isFavorite(article.id) ? '⭐ 已收藏' : '☆ 收藏'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 筛选
+    function filterArticles(category, btn) {
+      currentFilter = category;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderArticles();
+    }
+
+    // 显示文章详情
+    function showArticle(id) {
+      const article = articles.find(a => a.id === id);
+      if (!article) return;
+      
+      document.getElementById('articleList').style.display = 'none';
+      document.getElementById('articleDetail').classList.add('active');
+      
+      document.getElementById('detailContent').innerHTML = `
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:60px;margin-bottom:12px">${article.icon}</div>
+          <span class="tag tag-blue" style="margin-bottom:12px">${article.category}</span>
+          <h1 style="font-size:28px;margin:12px 0">${article.title}</h1>
+          <div style="color:var(--text-light);font-size:14px">
+            <span>📅 ${article.date}</span> · 
+            <span>👁 ${article.views} 阅读</span> · 
+            <span>⏱️ 约5分钟阅读</span>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:24px;line-height:2;font-size:15px">
+          <p style="margin-bottom:16px"><strong>${article.summary}</strong></p>
+          <p style="margin-bottom:16px">${article.content}</p>
+          <h3 style="margin:24px 0 12px;color:var(--primary)">一、核心要点</h3>
+          <p style="margin-bottom:16px">糖尿病管理是一个系统性工程，需要从饮食、运动、监测、用药等多个方面综合干预。本文将为您详细介绍相关知识，帮助您更好地管理血糖。</p>
+          <h3 style="margin:24px 0 12px;color:var(--primary)">二、实践建议</h3>
+          <ul style="padding-left:24px;margin-bottom:16px">
+            <li>建立健康的生活方式，循序渐进地改变不良习惯</li>
+            <li>定期监测血糖，记录血糖变化趋势</li>
+            <li>遵医嘱用药，不自行调整药物剂量</li>
+            <li>保持积极心态，主动学习糖尿病知识</li>
+            <li>定期复诊，及时调整治疗方案</li>
+          </ul>
+          <h3 style="margin:24px 0 12px;color:var(--primary)">三、注意事项</h3>
+          <p style="margin-bottom:16px">本文内容仅供参考，不能替代专业医疗建议。如有具体健康问题，请咨询专业医师。每个人的身体状况不同，适合的管理方案也因人而异。</p>
+          <div class="alert alert-info" style="margin-top:24px">
+            <strong>免责声明：</strong>本平台提供的健康资讯仅供参考，不能替代专业医疗诊断和治疗。如有不适，请及时就医。
+          </div>
+        </div>
+        <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:center">
+          <button class="btn ${Storage.isFavorite(article.id) ? 'btn-secondary' : 'btn-outline'}" onclick="toggleFav(${article.id}, this)">
+            ${Storage.isFavorite(article.id) ? '⭐ 已收藏' : '☆ 收藏文章'}
+          </button>
+          <button class="btn btn-primary" onclick="window.location.href='doctor.html'">咨询医师</button>
+        </div>
+      `;
+      window.scrollTo(0, 0);
+    }
+
+    // 返回列表
+    function backToList() {
+      document.getElementById('articleList').style.display = 'block';
+      document.getElementById('articleDetail').classList.remove('active');
+    }
+
+    // 收藏
+    function toggleFav(id, btn) {
+      const article = articles.find(a => a.id === id);
+      const isFav = Storage.toggleFavorite(article);
+      if (btn) {
+        btn.className = 'btn btn-sm ' + (isFav ? 'btn-secondary' : 'btn-outline');
+        btn.textContent = isFav ? '⭐ 已收藏' : '☆ 收藏';
+      }
+      Utils.toast(isFav ? '收藏成功' : '已取消收藏', isFav ? 'success' : 'info');
+      renderArticles();
+    }
+
+    // AI生成资讯
+    async function generateNews() {
+      const btn = document.getElementById('genNewsText');
+      btn.innerHTML = '<span class="loading"></span> 生成中...';
+      
+      const topics = ['糖尿病饮食管理', '糖尿病运动指南', '血糖监测技巧', '糖尿病并发症预防', '糖尿病用药知识', '糖尿病心理健康'];
+      const topic = topics[Math.floor(Math.random() * topics.length)];
+      
+      let content = '本周糖尿病领域有多项新研究发布，涵盖新型药物、监测技术和管理方法等方面...';
+      try {
+        const aiResult = await DifyAPI.runWorkflow({
+          type: 'news_generate',
+          topic: topic
+        });
+        if (aiResult && aiResult.result) {
+          content = aiResult.result;
+        }
+      } catch (e) {
+        console.error('AI news generation failed:', e);
+      }
+      
+      const newArticle = {
+        id: Date.now(),
+        title: `AI健康科普：${topic}`,
+        summary: content.substring(0, 60) + '...',
+        category: '疾病科普',
+        icon: '🤖',
+        color: '#8b5cf6',
+        date: Utils.formatDate(new Date(), 'YYYY-MM-DD'),
+        views: Math.floor(Math.random() * 500) + 100,
+        content: content
+      };
+      articles.unshift(newArticle);
+      renderArticles();
+      btn.textContent = 'AI生成资讯';
+      Utils.toast('资讯生成成功！', 'success');
+    }
+
+    // 初始化
+    renderArticles();
+  </script>
+</body>
+</html>

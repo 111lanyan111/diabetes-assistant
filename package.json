@@ -1,0 +1,17 @@
+{
+  "name": "diabetes-assistant",
+  "version": "1.0.0",
+  "description": "糖尿病预治智能助手 - 基于DeepSeek+Dify的智能体开发项目",
+  "main": "index.html",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:report": "npx playwright show-report",
+    "dev": "npx serve ."
+  },
+  "keywords": ["diabetes", "ai", "dify", "deepseek", "health"],
+  "author": "综合实训项目组",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+}

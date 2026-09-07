@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>医师咨询 - 糖尿病预治智能助手</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar"></nav>
+
+  <div class="container">
+    <div class="grid" style="grid-template-columns: 320px 1fr; gap:24px">
+      <!-- 医师列表 -->
+      <div>
+        <div class="card">
+          <div class="card-title"><span class="icon">👨‍⚕️</span>推荐医师</div>
+          <div id="doctorList"></div>
+        </div>
+        
+        <div class="card">
+          <div class="card-title"><span class="icon">💡</span>咨询提示</div>
+          <div style="font-size:13px;color:var(--text-light);line-height:1.8">
+            <p style="margin-bottom:8px">• 请详细描述您的症状和健康状况</p>
+            <p style="margin-bottom:8px">• 提供近期的血糖监测数据</p>
+            <p style="margin-bottom:8px">• 告知正在使用的药物</p>
+            <p style="margin-bottom:8px">• 医师建议仅供参考，不能替代面诊</p>
+            <p>• 紧急情况请立即拨打120</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 聊天区域 -->
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="chat-avatar" id="chatAvatar">👨‍⚕️</div>
+          <div>
+            <h3 id="chatDoctorName">请选择医师</h3>
+            <p style="font-size:12px;opacity:0.9" id="chatDoctorInfo">--</p>
+          </div>
+          <span class="tag" style="background:rgba(255,255,255,0.2);color:white;margin-left:auto" id="onlineStatus">离线</span>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+          <div style="text-align:center;padding:60px 20px;color:var(--text-light)">
+            <div style="font-size:60px;margin-bottom:16px">💬</div>
+            <h3 style="margin-bottom:8px">开始您的健康咨询</h3>
+            <p>请从左侧选择一位医师，开始在线咨询</p>
+          </div>
+        </div>
+        
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" id="chatInput" placeholder="请输入您的问题..." onkeypress="if(event.key==='Enter')sendMessage()">
+          <button class="btn btn-primary" onclick="sendMessage()">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer"></footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    Utils.initPage('doctor.html');
+    
+    let selectedDoctor = null;
+    let conversationId = '';
+
+    // 渲染医师列表
+    const doctorList = document.getElementById('doctorList');
+    MockData.doctors.forEach((doctor, index) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:14px;border-radius:10px;cursor:pointer;transition:all 0.2s;margin-bottom:8px;display:flex;gap:12px;align-items:center';
+      div.className = 'doctor-item';
+      div.innerHTML = `
+        <div style="width:48px;height:48px;border-radius:50%;background:#f0f9ff;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;position:relative">
+          ${doctor.avatar}
+          <span style="position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:50%;background:${doctor.online ? '#10b981' : '#94a3b8'};border:2px solid white"></span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px">
+            <h4 style="font-size:14px">${doctor.name}</h4>
+            <span class="tag tag-blue" style="font-size:10px">${doctor.title}</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-light);margin-top:2px">${doctor.department} · ${doctor.hospital}</p>
+          <p style="font-size:11px;color:var(--text-light);margin-top:2px">从业${doctor.experience} · ⭐ ${doctor.rating}</p>
+        </div>
+      `;
+      div.onclick = () => selectDoctor(doctor, div);
+      doctorList.appendChild(div);
+    });
+
+    // 选择医师
+    function selectDoctor(doctor, element) {
+      selectedDoctor = doctor;
+      conversationId = '';
+      
+      document.querySelectorAll('.doctor-item').forEach(el => {
+        el.style.background = 'transparent';
+      });
+      element.style.background = '#eff6ff';
+      
+      document.getElementById('chatAvatar').textContent = doctor.avatar;
+      document.getElementById('chatDoctorName').textContent = doctor.name + ' ' + doctor.title;
+      document.getElementById('chatDoctorInfo').textContent = doctor.hospital + ' · ' + doctor.department;
+      document.getElementById('onlineStatus').textContent = doctor.online ? '在线' : '离线';
+      document.getElementById('onlineStatus').style.background = doctor.online ? 'rgba(16,185,129,0.3)' : 'rgba(148,163,184,0.3)';
+      
+      // 初始化聊天
+      const messages = document.getElementById('chatMessages');
+      messages.innerHTML = '';
+      addMessage('ai', `您好，我是${doctor.name}${doctor.title}，从事${doctor.department}临床工作${doctor.experience}。擅长${doctor.specialty}。请问有什么可以帮助您的？`);
+      
+      // 快捷问题
+      setTimeout(() => {
+        const quickDiv = document.createElement('div');
+        quickDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 16px';
+        quickDiv.innerHTML = `
+          <span class="tag tag-blue" style="cursor:pointer;padding:6px 12px" onclick="quickAsk('血糖多少算正常？')">血糖多少算正常？</span>
+          <span class="tag tag-green" style="cursor:pointer;padding:6px 12px" onclick="quickAsk('糖尿病患者能吃水果吗？')">糖尿病患者能吃水果吗？</span>
+          <span class="tag tag-orange" style="cursor:pointer;padding:6px 12px" onclick="quickAsk('如何预防糖尿病并发症？')">如何预防并发症？</span>
+        `;
+        messages.appendChild(quickDiv);
+        messages.scrollTop = messages.scrollHeight;
+      }, 500);
+    }
+
+    // 快捷提问
+    function quickAsk(question) {
+      document.getElementById('chatInput').value = question;
+      sendMessage();
+    }
+
+    // 发送消息
+    async function sendMessage() {
+      if (!selectedDoctor) {
+        Utils.toast('请先选择一位医师', 'warning');
+        return;
+      }
+      
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      addMessage('user', text);
+      input.value = '';
+      
+      // 显示正在输入
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message ai';
+      typingDiv.id = 'typingIndicator';
+      typingDiv.innerHTML = `
+        <div class="message-avatar">${selectedDoctor.avatar}</div>
+        <div class="message-bubble">
+          <span style="display:inline-block;animation:bounce 1.4s infinite">●</span>
+          <span style="display:inline-block;animation:bounce 1.4s infinite 0.2s">●</span>
+          <span style="display:inline-block;animation:bounce 1.4s infinite 0.4s">●</span>
+        </div>
+      `;
+      document.getElementById('chatMessages').appendChild(typingDiv);
+      document.getElementById('chatMessages').scrollTop = 99999;
+      
+      // 调用AI生成医师回复
+      let reply;
+      try {
+        const doctorPrompt = `你是一位${selectedDepartment || '内分泌科'}医师，名叫${selectedDoctor?.name || '医师'}，有${selectedDoctor?.experience || '20年'}临床经验。请以专业医师的身份回答患者的问题，语气专业、耐心、有同理心。回答末尾加上"温馨提示：线上咨询不能替代面诊，如有紧急情况请及时就医。"
+
+患者问题：${text}`;
+        const result = await DifyAPI.chatMessage(doctorPrompt);
+        reply = result.answer;
+      } catch (error) {
+        console.error('Doctor AI error:', error);
+        reply = generateDoctorReply(text);
+      }
+      document.getElementById('typingIndicator')?.remove();
+      addMessage('ai', reply);
+    }
+
+    // 生成医师回复（模拟）
+    function generateDoctorReply(question) {
+      const q = question.toLowerCase();
+      
+      if (q.includes('血糖') || q.includes('正常')) {
+        return `根据《中国2型糖尿病防治指南》，血糖正常范围如下：\n\n• 空腹血糖：3.9-6.1 mmol/L\n• 餐后2小时血糖：<7.8 mmol/L\n• 糖化血红蛋白（HbA1c）：<6.5%\n\n如果空腹血糖在6.1-7.0之间，属于空腹血糖受损；餐后2小时在7.8-11.1之间，属于糖耐量异常。这两种情况都是糖尿病前期，需要积极干预。\n\n建议您定期监测血糖，保持健康的生活方式。`;
+      }
+      if (q.includes('水果') || q.includes('吃')) {
+        return `糖尿病患者是可以吃水果的，但需要注意以下几点：\n\n1. **选择低GI水果**：如苹果、梨、柚子、草莓、蓝莓等，避免荔枝、龙眼、榴莲等高糖水果\n2. **控制摄入量**：每次约100-200克，相当于一个中等大小的苹果\n3. **选择时机**：最好在两餐之间（上午10点、下午3点）作为加餐\n4. **监测血糖**：吃水果后2小时监测血糖，了解对自身的影响\n\n水果富含维生素、矿物质和膳食纤维，对健康有益，关键是适量选择。`;
+      }
+      if (q.includes('并发症') || q.includes('预防')) {
+        return `预防糖尿病并发症需要综合管理：\n\n**1. 血糖控制**\n- 定期监测空腹和餐后血糖\n- 每3个月检查糖化血红蛋白，目标<7%\n\n**2. 血压管理**\n- 目标血压<130/80 mmHg\n- 低盐饮食，必要时药物治疗\n\n**3. 血脂管理**\n- 低密度脂蛋白胆固醇<2.6 mmol/L\n- 减少饱和脂肪摄入\n\n**4. 定期筛查**\n- 每年检查眼底（视网膜病变）\n- 每年检查尿微量白蛋白（肾病）\n- 每日检查足部（糖尿病足）\n\n**5. 生活方式**\n- 戒烟限酒\n- 规律运动\n- 健康饮食\n\n早期发现、早期干预是预防并发症的关键。`;
+      }
+      if (q.includes('饮食') || q.includes('吃什么')) {
+        return `糖尿病饮食管理的核心原则：\n\n**主食类**\n- 选择低GI主食：糙米、燕麦、全麦面包\n- 控制分量：每餐约一个拳头大小\n- 粗细搭配：粗粮占1/3\n\n**蛋白质**\n- 优质蛋白：鱼、禽、蛋、豆制品\n- 每日蛋白质约1.0-1.2g/kg体重\n\n**蔬菜**\n- 每天至少500克蔬菜\n- 绿叶蔬菜占一半以上\n\n**注意事项**\n- 定时定量，少食多餐\n- 烹调方式：蒸、煮、炖为主，避免油炸\n- 限制添加糖和精制碳水\n\n需要我为您制定详细的饮食方案吗？`;
+      }
+      if (q.includes('运动') || q.includes('锻炼')) {
+        return `糖尿病患者运动建议：\n\n**有氧运动**\n- 类型：快走、慢跑、游泳、骑自行车\n- 频率：每周至少150分钟，分5天进行\n- 强度：中等强度（能说话但不能唱歌）\n\n**力量训练**\n- 每周2-3次，间隔至少48小时\n- 包括上肢、下肢、核心肌群\n- 每组8-12次，2-3组\n\n**注意事项**\n- 运动前监测血糖，<5.6mmol/L先加餐\n- 随身携带糖果或葡萄糖片，预防低血糖\n- 避免空腹运动\n- 足部有病变者选择低冲击运动（游泳、骑车）\n- 运动后监测血糖，了解运动效果\n\n循序渐进，持之以恒最重要。`;
+      }
+      
+      return `感谢您的咨询。关于"${question}"这个问题，建议您：\n\n1. 提供更详细的信息，例如您的年龄、糖尿病类型、病程、目前用药情况等\n2. 如果有近期的血糖监测数据或检查报告，可以分享给我\n3. 我会根据您的具体情况给出更有针对性的建议\n\n您还有其他疑问吗？我会尽力为您解答。\n\n**温馨提示**：线上咨询不能替代面诊，如有紧急情况请及时就医。`;
+    }
+
+    // 添加消息
+    function addMessage(type, text) {
+      const messages = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = 'message ' + type;
+      const avatar = type === 'ai' ? (selectedDoctor?.avatar || '👨‍⚕️') : '🧑';
+      div.innerHTML = `
+        <div class="message-avatar">${avatar}</div>
+        <div class="message-bubble">${text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+      `;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+  <style>
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+  </style>
+</body>
+</html>

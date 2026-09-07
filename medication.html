@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用药管理 - 糖尿病预治智能助手</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar"></nav>
+  
+  <div class="container">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <h1>💊 用药管理</h1>
+        <p style="color:var(--text-light);margin-top:8px">用药计划、提醒打卡、依从性统计</p>
+      </div>
+      <button class="btn btn-primary" onclick="showAddMedication()">+ 添加用药</button>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="grid grid-4" style="margin-bottom:24px">
+      <div class="card">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">💊</div>
+          <h3 style="font-size:24px;color:#2563eb" id="totalMeds">0</h3>
+          <p style="font-size:13px;color:var(--text-light)">在用药品</p>
+        </div>
+      </div>
+      <div class="card">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">⏰</div>
+          <h3 style="font-size:24px;color:#7c3aed" id="todayReminders">0</h3>
+          <p style="font-size:13px;color:var(--text-light)">今日提醒</p>
+        </div>
+      </div>
+      <div class="card">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">✅</div>
+          <h3 style="font-size:24px;color:#10b981" id="todayTaken">0</h3>
+          <p style="font-size:13px;color:var(--text-light)">今日已服</p>
+        </div>
+      </div>
+      <div class="card">
+        <div style="text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">📊</div>
+          <h3 style="font-size:24px;color:#d97706" id="complianceRate">--</h3>
+          <p style="font-size:13px;color:var(--text-light)">依从率</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 今日用药提醒 -->
+    <div class="card" style="margin-bottom:24px">
+      <h3 style="font-size:16px;margin-bottom:16px">📅 今日用药计划</h3>
+      <div id="todaySchedule">
+        <div style="text-align:center;padding:40px;color:var(--text-light)">
+          <div style="font-size:48px;margin-bottom:12px">💊</div>
+          <p>暂无用药计划，点击右上角"添加用药"开始管理</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用药列表 -->
+    <div class="card" style="margin-bottom:24px">
+      <h3 style="font-size:16px;margin-bottom:16px">📋 我的药品</h3>
+      <div id="medicationList">
+        <div style="text-align:center;padding:40px;color:var(--text-light)">
+          <div style="font-size:48px;margin-bottom:12px">📭</div>
+          <p>还没有添加药品</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用药记录 -->
+    <div class="card" style="margin-bottom:24px">
+      <h3 style="font-size:16px;margin-bottom:16px">📝 最近用药记录</h3>
+      <div id="medicationHistory">
+        <div style="text-align:center;padding:40px;color:var(--text-light)">
+          <div style="font-size:48px;margin-bottom:12px">📜</div>
+          <p>暂无用药记录</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI用药咨询 -->
+    <div class="card" style="margin-bottom:24px">
+      <h3 style="font-size:16px;margin-bottom:16px">🤖 AI用药咨询</h3>
+      <div style="display:flex;gap:12px;margin-bottom:16px">
+        <input type="text" class="form-input" id="medQuestion" placeholder="例如：二甲双胍和格列美脲可以一起吃吗？" style="flex:1">
+        <button class="btn btn-primary" onclick="askMedicationAI()">咨询</button>
+      </div>
+      <div id="medAIResult" style="display:none">
+        <div class="alert alert-info" style="white-space:pre-wrap;line-height:1.8" id="medAIAnswer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加用药弹窗 -->
+  <div class="modal" id="addMedModal" style="display:none">
+    <div class="modal-content" style="max-width:500px">
+      <div class="modal-header">
+        <h3>添加用药</h3>
+        <button class="modal-close" onclick="closeAddMedication()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>药品名称 *</label>
+          <input type="text" class="form-input" id="medName" placeholder="例如：二甲双胍">
+        </div>
+        <div class="form-group">
+          <label>剂量 *</label>
+          <input type="text" class="form-input" id="medDosage" placeholder="例如：0.5g / 每次1片">
+        </div>
+        <div class="form-group">
+          <label>用药频率</label>
+          <select class="form-input" id="medFrequency">
+            <option value="daily">每日一次</option>
+            <option value="twice">每日两次</option>
+            <option value="thrice">每日三次</option>
+            <option value="weekly">每周一次</option>
+            <option value="as_needed">按需服用</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>提醒时间（多个用逗号分隔）</label>
+          <input type="text" class="form-input" id="medTimes" placeholder="例如：08:00,12:00,18:00">
+        </div>
+        <div class="form-group">
+          <label>用药说明</label>
+          <textarea class="form-input" id="medNotes" rows="3" placeholder="例如：饭后服用，避免与酒精同服"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAddMedication()">取消</button>
+        <button class="btn btn-primary" onclick="saveMedication()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"></div>
+
+  <script src="js/common.js"></script>
+  <script>
+    Utils.renderNav('medication.html');
+    Utils.renderFooter();
+
+    let medications = [];
+    let medRecords = [];
+
+    // 初始化
+    function init() {
+      medications = Storage.get('medications') || [];
+      medRecords = Storage.get('medRecords') || [];
+      renderStatistics();
+      renderTodaySchedule();
+      renderMedicationList();
+      renderMedicationHistory();
+      requestNotificationPermission();
+    }
+
+    // 请求通知权限
+    function requestNotificationPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    // 渲染统计
+    function renderStatistics() {
+      document.getElementById('totalMeds').textContent = medications.length;
+      
+      const today = new Date().toDateString();
+      const todayRecords = medRecords.filter(r => new Date(r.date).toDateString() === today);
+      document.getElementById('todayTaken').textContent = todayRecords.length;
+      
+      // 计算今日提醒数
+      let reminders = 0;
+      medications.forEach(m => {
+        if (m.times) reminders += m.times.split(',').length;
+      });
+      document.getElementById('todayReminders').textContent = reminders;
+      
+      // 计算依从率（近7天）
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const recentRecords = medRecords.filter(r => new Date(r.date) >= sevenDaysAgo);
+      const expectedPerDay = reminders;
+      const expectedTotal = expectedPerDay * 7;
+      const rate = expectedTotal > 0 ? Math.round((recentRecords.length / expectedTotal) * 100) : 0;
+      document.getElementById('complianceRate').textContent = rate + '%';
+    }
+
+    // 渲染今日用药计划
+    function renderTodaySchedule() {
+      const container = document.getElementById('todaySchedule');
+      if (medications.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px;color:var(--text-light)">
+            <div style="font-size:48px;margin-bottom:12px">💊</div>
+            <p>暂无用药计划，点击右上角"添加用药"开始管理</p>
+          </div>
+        `;
+        return;
+      }
+      
+      const today = new Date().toDateString();
+      let html = '';
+      
+      medications.forEach(med => {
+        const times = med.times ? med.times.split(',') : [];
+        times.forEach(time => {
+          const recordKey = med.id + '_' + time.trim();
+          const taken = medRecords.some(r => 
+            new Date(r.date).toDateString() === today && 
+            r.medicationId === med.id && 
+            r.time === time.trim()
+          );
+          
+          html += `
+            <div class="schedule-item" style="display:flex;align-items:center;justify-content:space-between;padding:16px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px;${taken ? 'background:#f0fdf4;border-color:#86efac' : ''}">
+              <div style="display:flex;align-items:center;gap:16px">
+                <div style="font-size:32px">${taken ? '✅' : '💊'}</div>
+                <div>
+                  <h4 style="font-size:15px;margin-bottom:4px">${med.name}</h4>
+                  <p style="font-size:13px;color:var(--text-light)">${med.dosage} · ${time.trim()}</p>
+                  ${med.notes ? `<p style="font-size:12px;color:#6b7280;margin-top:4px">${med.notes}</p>` : ''}
+                </div>
+              </div>
+              <div>
+                ${taken ? 
+                  `<span class="tag tag-green">已服用</span>` : 
+                  `<button class="btn btn-primary btn-sm" onclick="takeMedication('${med.id}','${time.trim()}')">确认服用</button>`
+                }
+              </div>
+            </div>
+          `;
+        });
+      });
+      
+      container.innerHTML = html;
+    }
+
+    // 确认服药
+    function takeMedication(medId, time) {
+      const med = medications.find(m => m.id === medId);
+      if (!med) return;
+      
+      const record = {
+        id: 'rec_' + Date.now(),
+        medicationId: medId,
+        medicationName: med.name,
+        dosage: med.dosage,
+        time: time,
+        date: new Date().toISOString()
+      };
+      
+      medRecords.unshift(record);
+      Storage.set('medRecords', medRecords);
+      
+      Utils.toast('已记录服药：' + med.name, 'success');
+      renderStatistics();
+      renderTodaySchedule();
+      renderMedicationHistory();
+    }
+
+    // 渲染药品列表
+    function renderMedicationList() {
+      const container = document.getElementById('medicationList');
+      if (medications.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px;color:var(--text-light)">
+            <div style="font-size:48px;margin-bottom:12px">📭</div>
+            <p>还没有添加药品</p>
+          </div>
+        `;
+        return;
+      }
+      
+      const freqMap = {
+        daily: '每日一次',
+        twice: '每日两次',
+        thrice: '每日三次',
+        weekly: '每周一次',
+        as_needed: '按需服用'
+      };
+      
+      container.innerHTML = medications.map(med => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="font-size:32px">💊</div>
+            <div>
+              <h4 style="font-size:15px;margin-bottom:4px">${med.name}</h4>
+              <p style="font-size:13px;color:var(--text-light)">${med.dosage} · ${freqMap[med.frequency] || med.frequency}</p>
+              ${med.times ? `<p style="font-size:12px;color:#6b7280;margin-top:4px">提醒时间：${med.times}</p>` : ''}
+            </div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="deleteMedication('${med.id}')">删除</button>
+        </div>
+      `).join('');
+    }
+
+    // 渲染用药记录
+    function renderMedicationHistory() {
+      const container = document.getElementById('medicationHistory');
+      if (medRecords.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px;color:var(--text-light)">
+            <div style="font-size:48px;margin-bottom:12px">📜</div>
+            <p>暂无用药记录</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = medRecords.slice(0, 10).map(r => {
+        const d = new Date(r.date);
+        return `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #f3f4f6">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:20px">✅</span>
+              <div>
+                <p style="font-size:14px;font-weight:500">${r.medicationName}</p>
+                <p style="font-size:12px;color:var(--text-light)">${r.dosage} · ${r.time}</p>
+              </div>
+            </div>
+            <span style="font-size:12px;color:var(--text-light)">${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 显示添加用药弹窗
+    function showAddMedication() {
+      document.getElementById('addMedModal').style.display = 'flex';
+    }
+
+    // 关闭添加用药弹窗
+    function closeAddMedication() {
+      document.getElementById('addMedModal').style.display = 'none';
+      document.getElementById('medName').value = '';
+      document.getElementById('medDosage').value = '';
+      document.getElementById('medTimes').value = '';
+      document.getElementById('medNotes').value = '';
+    }
+
+    // 保存用药
+    function saveMedication() {
+      const name = document.getElementById('medName').value.trim();
+      const dosage = document.getElementById('medDosage').value.trim();
+      const frequency = document.getElementById('medFrequency').value;
+      const times = document.getElementById('medTimes').value.trim();
+      const notes = document.getElementById('medNotes').value.trim();
+      
+      if (!name || !dosage) {
+        Utils.toast('请填写药品名称和剂量', 'warning');
+        return;
+      }
+      
+      const med = {
+        id: 'med_' + Date.now(),
+        name: name,
+        dosage: dosage,
+        frequency: frequency,
+        times: times,
+        notes: notes,
+        createdAt: new Date().toISOString()
+      };
+      
+      medications.unshift(med);
+      Storage.set('medications', medications);
+      
+      Utils.toast('用药添加成功', 'success');
+      closeAddMedication();
+      renderStatistics();
+      renderTodaySchedule();
+      renderMedicationList();
+    }
+
+    // 删除用药
+    function deleteMedication(id) {
+      if (!confirm('确定要删除这个用药吗？')) return;
+      medications = medications.filter(m => m.id !== id);
+      Storage.set('medications', medications);
+      Utils.toast('已删除', 'success');
+      renderStatistics();
+      renderTodaySchedule();
+      renderMedicationList();
+    }
+
+    // AI用药咨询
+    async function askMedicationAI() {
+      const question = document.getElementById('medQuestion').value.trim();
+      if (!question) {
+        Utils.toast('请输入您的问题', 'warning');
+        return;
+      }
+      
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> 咨询中...';
+      
+      try {
+        const medList = medications.map(m => `${m.name}(${m.dosage})`).join('、');
+        const prompt = `你是一位专业的临床药师。患者正在使用以下药物：${medList || '暂无'}。请回答以下用药问题：${question}。请给出专业、准确的用药建议，并提醒患者遵医嘱用药。`;
+        
+        const result = await DifyAPI.chatMessage(prompt);
+        document.getElementById('medAIAnswer').textContent = result.answer;
+        document.getElementById('medAIResult').style.display = 'block';
+      } catch (error) {
+        Utils.toast('AI咨询失败，请稍后重试', 'error');
+      }
+      
+      btn.disabled = false;
+      btn.textContent = '咨询';
+    }
+
+    // 初始化
+    init();
+  </script>
+</body>
+</html>

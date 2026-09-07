@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能管理 - 糖尿病预治智能助手</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-sidebar { background: #1e293b; color: white; border-radius: 12px; padding: 16px; }
+    .admin-menu-item {
+      padding: 12px 16px; border-radius: 8px; cursor: pointer; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 10px; font-size: 14px; transition: all 0.2s;
+    }
+    .admin-menu-item:hover { background: rgba(255,255,255,0.1); }
+    .admin-menu-item.active { background: var(--primary); }
+  </style>
+</head>
+<body>
+  <nav class="navbar"></nav>
+
+  <div class="container">
+    <div class="grid" style="grid-template-columns: 220px 1fr; gap:20px">
+      <!-- 侧边栏 -->
+      <div class="admin-sidebar">
+        <h3 style="padding:8px 16px;font-size:16px;margin-bottom:12px">⚙️ 管理后台</h3>
+        <div class="admin-menu-item active" onclick="switchAdminTab('dashboard', this)">📊 数据概览</div>
+        <div class="admin-menu-item" onclick="switchAdminTab('users', this)">👥 用户管理</div>
+        <div class="admin-menu-item" onclick="switchAdminTab('articles', this)">📰 资讯管理</div>
+        <div class="admin-menu-item" onclick="switchAdminTab('ai', this)">🤖 AI智能管理</div>
+        <div class="admin-menu-item" onclick="switchAdminTab('logs', this)">📋 系统日志</div>
+      </div>
+
+      <!-- 主内容区 -->
+      <div>
+        <!-- 数据概览 -->
+        <div id="tab-dashboard" class="admin-tab">
+          <div class="grid grid-4" style="margin-bottom:20px">
+            <div class="stat-card">
+              <div class="stat-icon blue">👥</div>
+              <div class="stat-info"><h3>1,256</h3><p>注册用户</p></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green">📊</div>
+              <div class="stat-info"><h3>3,892</h3><p>风险评估</p></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange">💬</div>
+              <div class="stat-info"><h3>15,678</h3><p>AI对话</p></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon red">✅</div>
+              <div class="stat-info"><h3>8,456</h3><p>打卡次数</p></div>
+            </div>
+          </div>
+          
+          <div class="grid grid-2" style="gap:20px">
+            <div class="card">
+              <div class="card-title"><span class="icon">📈</span>用户增长趋势</div>
+              <div style="height:200px;display:flex;align-items:flex-end;gap:8px;padding:20px 0">
+                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:40%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">120</span></div>
+                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:55%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">180</span></div>
+                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:45%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">150</span></div>
+                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:70%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">230</span></div>
+                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:65%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">210</span></div>
+                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:85%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">280</span></div>
+                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:100%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">320</span></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);padding:0 4px">
+                <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="card-title"><span class="icon">🎯</span>功能使用分布</div>
+              <div style="padding:10px 0">
+                <div style="margin-bottom:14px">
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>风险评估</span><span>32%</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:32%;background:var(--primary)"></div></div>
+                </div>
+                <div style="margin-bottom:14px">
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>AI对话</span><span>28%</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:28%;background:var(--secondary)"></div></div>
+                </div>
+                <div style="margin-bottom:14px">
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>生活方案</span><span>18%</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:18%;background:var(--accent)"></div></div>
+                </div>
+                <div style="margin-bottom:14px">
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>健康打卡</span><span>14%</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:14%;background:#8b5cf6"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>医师咨询</span><span>8%</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:8%;background:var(--danger)"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 用户管理 -->
+        <div id="tab-users" class="admin-tab" style="display:none">
+          <div class="card">
+            <div class="card-title" style="justify-content:space-between">
+              <span><span class="icon">👥</span>用户管理（SQLite数据库）</span>
+              <div style="display:flex;gap:10px">
+                <input type="text" class="form-input" id="userSearch" style="width:200px" placeholder="搜索用户名/姓名..." onkeypress="if(event.key==='Enter')loadUsers(1)">
+                <button class="btn btn-primary btn-sm" onclick="showUserModal()">+ 新增用户</button>
+                <button class="btn btn-secondary btn-sm" onclick="loadUsers(1)">刷新</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>用户名</th><th>姓名</th><th>邮箱</th><th>年龄</th><th>性别</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead>
+              <tbody id="userTableBody">
+                <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-light)">加载中...</td></tr>
+              </tbody>
+            </table>
+            <div id="userPagination" style="margin-top:16px;display:flex;justify-content:space-between;align-items:center">
+              <span id="userTotal" style="font-size:13px;color:var(--text-light)"></span>
+              <div id="userPageButtons" style="display:flex;gap:8px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 资讯管理 -->
+        <div id="tab-articles" class="admin-tab" style="display:none">
+          <div class="card">
+            <div class="card-title" style="justify-content:space-between">
+              <span><span class="icon">📰</span>资讯管理</span>
+              <button class="btn btn-primary btn-sm" onclick="Utils.toast('AI生成中...', 'info')">+ AI生成资讯</button>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>标题</th><th>分类</th><th>阅读量</th><th>发布时间</th><th>操作</th></tr></thead>
+              <tbody id="articleTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- AI管理 -->
+        <div id="tab-ai" class="admin-tab" style="display:none">
+          <div class="grid grid-2" style="gap:20px">
+            <div class="card">
+              <div class="card-title"><span class="icon">🤖</span>模型配置</div>
+              <div class="form-group">
+                <label class="form-label">大语言模型</label>
+                <select class="form-select">
+                  <option>deepseek-v4-pro</option>
+                  <option>deepseek-v4-flash</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Embedding模型</label>
+                <select class="form-select">
+                  <option>embeddinggemma:300m</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">温度 (Temperature)</label>
+                <input type="range" class="form-input" min="0" max="1" step="0.1" value="0.7">
+              </div>
+              <div class="form-group">
+                <label class="form-label">最大Token数</label>
+                <input type="number" class="form-input" value="4096">
+              </div>
+              <button class="btn btn-primary">保存配置</button>
+            </div>
+            
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span>AI使用统计</div>
+              <div style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                  <span style="font-size:14px">今日调用次数</span>
+                  <span style="font-weight:700;color:var(--primary)">1,234</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:65%;background:var(--primary)"></div></div>
+              </div>
+              <div style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                  <span style="font-size:14px">Token消耗</span>
+                  <span style="font-weight:700;color:var(--secondary)">2.5M</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--secondary)"></div></div>
+              </div>
+              <div style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                  <span style="font-size:14px">平均响应时间</span>
+                  <span style="font-weight:700;color:var(--accent)">1.2s</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:30%;background:var(--accent)"></div></div>
+              </div>
+              <div class="alert alert-info">
+                <strong>提示：</strong>AI管理助手可以帮助您智能分析用户行为、优化推荐内容、自动生成健康资讯。
+              </div>
+            </div>
+          </div>
+          
+          <div class="card" style="margin-top:20px">
+            <div class="card-title"><span class="icon">🧠</span>AI管理助手对话</div>
+            <div style="height:300px;background:#f8fafc;border-radius:8px;padding:16px;overflow-y:auto;margin-bottom:12px" id="adminChat">
+              <div class="message ai" style="max-width:100%">
+                <div class="message-avatar">🤖</div>
+                <div class="message-bubble">您好，我是AI管理助手。我可以帮您分析用户数据、生成运营报告、管理资讯内容。请问有什么可以帮您？</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <input type="text" class="form-input" id="adminChatInput" placeholder="例如：分析本周用户增长情况" onkeypress="if(event.key==='Enter')adminSend()">
+              <button class="btn btn-primary" onclick="adminSend()">发送</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 系统日志 -->
+        <div id="tab-logs" class="admin-tab" style="display:none">
+          <div class="card">
+            <div class="card-title"><span class="icon">📋</span>系统日志</div>
+            <table class="data-table">
+              <thead><tr><th>时间</th><th>级别</th><th>模块</th><th>内容</th><th>操作人</th></tr></thead>
+              <tbody>
+                <tr><td>2026-09-05 14:32:15</td><td><span class="tag tag-green">INFO</span></td><td>用户模块</td><td>用户注册成功</td><td>system</td></tr>
+                <tr><td>2026-09-05 14:28:03</td><td><span class="tag tag-blue">INFO</span></td><td>AI模块</td><td>风险评估工作流执行成功</td><td>user_123</td></tr>
+                <tr><td>2026-09-05 14:15:47</td><td><span class="tag tag-orange">WARN</span></td><td>AI模块</td><td>模型响应超时，已自动重试</td><td>system</td></tr>
+                <tr><td>2026-09-05 13:58:22</td><td><span class="tag tag-green">INFO</span></td><td>资讯模块</td><td>AI生成健康资讯1篇</td><td>admin</td></tr>
+                <tr><td>2026-09-05 13:45:10</td><td><span class="tag tag-green">INFO</span></td><td>打卡模块</td><td>用户完成今日健康打卡</td><td>user_456</td></tr>
+                <tr><td>2026-09-05 13:30:05</td><td><span class="tag tag-red">ERROR</span></td><td>数据库</td><td>连接池已满，已扩容</td><td>system</td></tr>
+                <tr><td>2026-09-05 12:15:33</td><td><span class="tag tag-green">INFO</span></td><td>系统</td><td>定时备份完成</td><td>system</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 用户编辑弹窗 -->
+  <div class="modal" id="userModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+    <div class="modal-content" style="background:white;border-radius:12px;width:500px;max-height:90vh;overflow-y:auto">
+      <div class="modal-header" style="padding:20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
+        <h3 id="userModalTitle">新增用户</h3>
+        <button onclick="closeUserModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#6b7280">×</button>
+      </div>
+      <div class="modal-body" style="padding:20px">
+        <input type="hidden" id="editUserId">
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">用户名 *</label>
+          <input type="text" class="form-input" id="editUsername" placeholder="请输入用户名">
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">密码 <span id="passwordHint" style="color:#6b7280;font-size:12px">（新增时必填）</span></label>
+          <input type="password" class="form-input" id="editPassword" placeholder="请输入密码">
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">真实姓名</label>
+          <input type="text" class="form-input" id="editRealName" placeholder="请输入真实姓名">
+        </div>
+        <div class="grid grid-2" style="gap:12px;margin-bottom:16px">
+          <div class="form-group">
+            <label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">邮箱</label>
+            <input type="email" class="form-input" id="editEmail" placeholder="请输入邮箱">
+          </div>
+          <div class="form-group">
+            <label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">手机号</label>
+            <input type="text" class="form-input" id="editPhone" placeholder="请输入手机号">
+          </div>
+        </div>
+        <div class="grid grid-3" style="gap:12px;margin-bottom:16px">
+          <div class="form-group">
+            <label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">年龄</label>
+            <input type="number" class="form-input" id="editAge" placeholder="年龄">
+          </div>
+          <div class="form-group">
+            <label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">性别</label>
+            <select class="form-input" id="editGender">
+              <option value="">请选择</option>
+              <option value="男">男</option>
+              <option value="女">女</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">角色</label>
+            <select class="form-input" id="editRole">
+              <option value="user">普通用户</option>
+              <option value="admin">管理员</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">状态</label>
+          <select class="form-input" id="editStatus">
+            <option value="active">正常</option>
+            <option value="disabled">禁用</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:16px 20px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:10px">
+        <button class="btn btn-secondary" onclick="closeUserModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveUser()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer"></footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    Utils.initPage('admin.html');
+    
+    // 切换管理标签
+    function switchAdminTab(tab, element) {
+      document.querySelectorAll('.admin-tab').forEach(t => t.style.display = 'none');
+      document.querySelectorAll('.admin-menu-item').forEach(m => m.classList.remove('active'));
+      document.getElementById('tab-' + tab).style.display = 'block';
+      element.classList.add('active');
+    }
+    
+    // ==================== 用户管理（SQLite数据库 + Flask API）====================
+    const API_BASE = 'http://localhost:5000/api';
+    let currentPage = 1;
+    let totalPages = 1;
+
+    // 加载用户列表
+    async function loadUsers(page = 1) {
+      currentPage = page;
+      const search = document.getElementById('userSearch')?.value || '';
+      const tbody = document.getElementById('userTableBody');
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-light)">加载中...</td></tr>';
+      
+      try {
+        const url = `${API_BASE}/users?page=${page}&per_page=10&search=${encodeURIComponent(search)}`;
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.code === 0 && result.data) {
+          const users = result.data.list;
+          const total = result.data.total;
+          totalPages = Math.ceil(total / 10);
+          
+          if (users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-light)">暂无用户数据</td></tr>';
+          } else {
+            tbody.innerHTML = users.map(u => `
+              <tr>
+                <td>${u.id}</td>
+                <td><strong>${u.username}</strong></td>
+                <td>${u.real_name || '-'}</td>
+                <td>${u.email || '-'}</td>
+                <td>${u.age || '-'}</td>
+                <td>${u.gender || '-'}</td>
+                <td><span class="tag tag-${u.role === 'admin' ? 'purple' : 'blue'}">${u.role === 'admin' ? '管理员' : '用户'}</span></td>
+                <td><span class="tag tag-${u.status === 'active' ? 'green' : 'red'}">${u.status === 'active' ? '正常' : '禁用'}</span></td>
+                <td style="font-size:12px">${u.created_at ? u.created_at.substring(0, 10) : '-'}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline" onclick="editUser(${u.id})">编辑</button>
+                  <button class="btn btn-sm ${u.status === 'active' ? 'btn-warning' : 'btn-success'}" onclick="toggleUserStatus(${u.id}, '${u.status}')">${u.status === 'active' ? '禁用' : '启用'}</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id}, '${u.username}')">删除</button>
+                </td>
+              </tr>
+            `).join('');
+          }
+          
+          // 分页
+          document.getElementById('userTotal').textContent = `共 ${total} 条记录，第 ${page}/${totalPages} 页`;
+          renderPagination(page, totalPages);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#ef4444">加载失败：' + (result.message || '未知错误') + '</td></tr>';
+        }
+      } catch (error) {
+        console.error('Load users error:', error);
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#ef4444">加载失败，请确保后端服务已启动（http://localhost:5000）</td></tr>';
+      }
+    }
+
+    // 渲染分页按钮
+    function renderPagination(current, total) {
+      const container = document.getElementById('userPageButtons');
+      let html = '';
+      
+      if (current > 1) {
+        html += `<button class="btn btn-sm btn-outline" onclick="loadUsers(${current - 1})">上一页</button>`;
+      }
+      
+      const start = Math.max(1, current - 2);
+      const end = Math.min(total, current + 2);
+      for (let i = start; i <= end; i++) {
+        html += `<button class="btn btn-sm ${i === current ? 'btn-primary' : 'btn-outline'}" onclick="loadUsers(${i})">${i}</button>`;
+      }
+      
+      if (current < total) {
+        html += `<button class="btn btn-sm btn-outline" onclick="loadUsers(${current + 1})">下一页</button>`;
+      }
+      
+      container.innerHTML = html;
+    }
+
+    // 显示新增用户弹窗
+    function showUserModal() {
+      document.getElementById('userModalTitle').textContent = '新增用户';
+      document.getElementById('editUserId').value = '';
+      document.getElementById('editUsername').value = '';
+      document.getElementById('editPassword').value = '';
+      document.getElementById('editRealName').value = '';
+      document.getElementById('editEmail').value = '';
+      document.getElementById('editPhone').value = '';
+      document.getElementById('editAge').value = '';
+      document.getElementById('editGender').value = '';
+      document.getElementById('editRole').value = 'user';
+      document.getElementById('editStatus').value = 'active';
+      document.getElementById('passwordHint').textContent = '（新增时必填）';
+      document.getElementById('userModal').style.display = 'flex';
+    }
+
+    // 编辑用户
+    async function editUser(userId) {
+      try {
+        const response = await fetch(`${API_BASE}/users/${userId}`);
+        const result = await response.json();
+        
+        if (result.code === 0 && result.data) {
+          const u = result.data;
+          document.getElementById('userModalTitle').textContent = '编辑用户';
+          document.getElementById('editUserId').value = u.id;
+          document.getElementById('editUsername').value = u.username;
+          document.getElementById('editPassword').value = '';
+          document.getElementById('editRealName').value = u.real_name || '';
+          document.getElementById('editEmail').value = u.email || '';
+          document.getElementById('editPhone').value = u.phone || '';
+          document.getElementById('editAge').value = u.age || '';
+          document.getElementById('editGender').value = u.gender || '';
+          document.getElementById('editRole').value = u.role || 'user';
+          document.getElementById('editStatus').value = u.status || 'active';
+          document.getElementById('passwordHint').textContent = '（不修改请留空）';
+          document.getElementById('userModal').style.display = 'flex';
+        } else {
+          Utils.toast('获取用户信息失败', 'error');
+        }
+      } catch (error) {
+        Utils.toast('获取用户信息失败', 'error');
+      }
+    }
+
+    // 关闭弹窗
+    function closeUserModal() {
+      document.getElementById('userModal').style.display = 'none';
+    }
+
+    // 保存用户
+    async function saveUser() {
+      const userId = document.getElementById('editUserId').value;
+      const username = document.getElementById('editUsername').value.trim();
+      const password = document.getElementById('editPassword').value;
+      
+      if (!username) {
+        Utils.toast('用户名不能为空', 'warning');
+        return;
+      }
+      if (!userId && !password) {
+        Utils.toast('新增用户时密码不能为空', 'warning');
+        return;
+      }
+      
+      const data = {
+        username: username,
+        real_name: document.getElementById('editRealName').value,
+        email: document.getElementById('editEmail').value,
+        phone: document.getElementById('editPhone').value,
+        age: document.getElementById('editAge').value ? parseInt(document.getElementById('editAge').value) : null,
+        gender: document.getElementById('editGender').value,
+        role: document.getElementById('editRole').value,
+        status: document.getElementById('editStatus').value
+      };
+      
+      if (password) {
+        data.password = password;
+      }
+      
+      try {
+        let url, method;
+        if (userId) {
+          url = `${API_BASE}/users/${userId}`;
+          method = 'PUT';
+        } else {
+          url = `${API_BASE}/users`;
+          method = 'POST';
+        }
+        
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        
+        if (result.code === 0) {
+          Utils.toast(userId ? '用户更新成功' : '用户创建成功', 'success');
+          closeUserModal();
+          loadUsers(currentPage);
+        } else {
+          Utils.toast(result.message || '操作失败', 'error');
+        }
+      } catch (error) {
+        Utils.toast('操作失败，请检查后端服务', 'error');
+      }
+    }
+
+    // 切换用户状态
+    async function toggleUserStatus(userId, currentStatus) {
+      const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
+      try {
+        const response = await fetch(`${API_BASE}/users/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        const result = await response.json();
+        if (result.code === 0) {
+          Utils.toast(newStatus === 'active' ? '用户已启用' : '用户已禁用', 'success');
+          loadUsers(currentPage);
+        } else {
+          Utils.toast(result.message || '操作失败', 'error');
+        }
+      } catch (error) {
+        Utils.toast('操作失败', 'error');
+      }
+    }
+
+    // 删除用户
+    async function deleteUser(userId, username) {
+      if (!confirm(`确定要删除用户 "${username}" 吗？此操作不可恢复！`)) return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/users/${userId}`, { method: 'DELETE' });
+        const result = await response.json();
+        if (result.code === 0) {
+          Utils.toast('用户删除成功', 'success');
+          loadUsers(currentPage);
+        } else {
+          Utils.toast(result.message || '删除失败', 'error');
+        }
+      } catch (error) {
+        Utils.toast('删除失败', 'error');
+      }
+    }
+
+    // 页面加载时自动加载用户列表
+    setTimeout(() => loadUsers(1), 500);
+    
+    
+    // 资讯数据
+    document.getElementById('articleTableBody').innerHTML = MockData.articles.map(a => `
+      <tr>
+        <td>${a.id}</td>
+        <td>${a.title}</td>
+        <td><span class="tag tag-blue">${a.category}</span></td>
+        <td>${a.views}</td>
+        <td>${a.date}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick="Utils.toast('编辑文章', 'info')">编辑</button>
+          <button class="btn btn-sm btn-danger" onclick="Utils.toast('已删除', 'success')">删除</button>
+        </td>
+      </tr>
+    `).join('');
+    
+    // 管理助手对话
+    async function adminSend() {
+      const input = document.getElementById('adminChatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      const chat = document.getElementById('adminChat');
+      chat.innerHTML += `
+        <div class="message user" style="max-width:100%">
+          <div class="message-avatar">👤</div>
+          <div class="message-bubble">${text}</div>
+        </div>
+      `;
+      input.value = '';
+      chat.scrollTop = chat.scrollHeight;
+      
+      // 显示正在输入
+      chat.innerHTML += `
+        <div class="message ai" style="max-width:100%" id="adminTyping">
+          <div class="message-avatar">🤖</div>
+          <div class="message-bubble"><span style="animation:bounce 1.4s infinite">●</span> <span style="animation:bounce 1.4s infinite 0.2s">●</span> <span style="animation:bounce 1.4s infinite 0.4s">●</span></div>
+        </div>
+      `;
+      chat.scrollTop = chat.scrollHeight;
+      
+      // 调用AI生成管理助手回复
+      let reply;
+      try {
+        const adminPrompt = `你是糖尿病健康管理平台的AI运营助手。请根据管理员的问题，给出专业的运营分析和建议。当前平台数据：本周新增用户128人，风险评估完成342次，AI对话总量2156次。
+
+管理员问题：${text}`;
+        const result = await DifyAPI.chatMessage(adminPrompt);
+        reply = result.answer;
+      } catch (error) {
+        console.error('Admin AI error:', error);
+        reply = '根据系统数据分析：本周新增用户128人，环比增长15%；风险评估完成342次，其中高风险用户占比12%；AI对话总量2,156次，平均响应时间1.2秒。建议针对高风险用户推送个性化健康方案。';
+      }
+      
+      document.getElementById('adminTyping')?.remove();
+      chat.innerHTML += `
+        <div class="message ai" style="max-width:100%">
+          <div class="message-avatar">🤖</div>
+          <div class="message-bubble" style="white-space:pre-wrap">${reply}</div>
+        </div>
+      `;
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>

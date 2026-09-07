@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>健康报告 - 糖尿病预治智能助手</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    @media print {
+      .navbar, .footer, .no-print { display: none !important; }
+      .container { max-width: 100% !important; padding: 0 !important; }
+      .report-content { box-shadow: none !important; border: none !important; }
+    }
+    .report-content {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .report-header {
+      text-align: center;
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .report-section {
+      margin-bottom: 24px;
+    }
+    .report-section h3 {
+      font-size: 16px;
+      color: #2563eb;
+      border-left: 4px solid #2563eb;
+      padding-left: 12px;
+      margin-bottom: 12px;
+    }
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+    }
+    .report-table th, .report-table td {
+      border: 1px solid #e5e7eb;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+    .report-table th {
+      background: #f8fafc;
+      font-weight: 600;
+    }
+    .score-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar"></nav>
+  
+  <div class="container">
+    <div class="page-header no-print" style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <h1>📋 健康报告</h1>
+        <p style="color:var(--text-light);margin-top:8px">生成周/月健康报告，支持打印导出</p>
+      </div>
+      <div style="display:flex;gap:12px">
+        <select class="form-input" id="reportRange" style="width:auto">
+          <option value="7">近7天报告</option>
+          <option value="14">近14天报告</option>
+          <option value="30">近30天报告</option>
+        </select>
+        <button class="btn btn-primary" onclick="generateReport()">生成报告</button>
+        <button class="btn btn-success" onclick="printReport()" id="printBtn" style="display:none">🖨️ 打印/导出PDF</button>
+      </div>
+    </div>
+
+    <!-- 报告生成前提示 -->
+    <div class="card no-print" id="reportEmpty" style="text-align:center;padding:60px">
+      <div style="font-size:64px;margin-bottom:20px">📊</div>
+      <h3 style="font-size:18px;margin-bottom:12px">还没有生成报告</h3>
+      <p style="color:var(--text-light);margin-bottom:24px">选择报告周期，点击"生成报告"按钮，AI将为您生成专业的健康分析报告</p>
+      <button class="btn btn-primary btn-lg" onclick="generateReport()">立即生成报告</button>
+    </div>
+
+    <!-- 报告内容 -->
+    <div id="reportContent" style="display:none">
+      <div class="report-content" id="reportPrintArea">
+        <div class="report-header">
+          <h1 style="font-size:24px;color:#1e293b;margin-bottom:8px">糖尿病健康管理报告</h1>
+          <p style="color:#64748b;font-size:14px" id="reportDateRange">报告周期：--</p>
+          <p style="color:#94a3b8;font-size:12px;margin-top:8px">生成时间：<span id="reportGenerateTime">--</span></p>
+        </div>
+
+        <!-- 健康评分 -->
+        <div class="report-section" style="text-align:center">
+          <h3>健康综合评分</h3>
+          <div class="score-circle" id="scoreCircle" style="background:#2563eb">--</div>
+          <p style="margin-top:12px;font-size:14px;color:#64748b" id="scoreLevel">--</p>
+        </div>
+
+        <!-- 基本信息 -->
+        <div class="report-section">
+          <h3>一、基本信息</h3>
+          <table class="report-table">
+            <tr><th style="width:30%">报告周期</th><td id="infoRange">--</td></tr>
+            <tr><th>打卡天数</th><td id="infoCheckinDays">--</td></tr>
+            <tr><th>用药记录</th><td id="infoMedRecords">--</td></tr>
+            <tr><th>风险评估次数</th><td id="infoRiskCount">--</td></tr>
+          </table>
+        </div>
+
+        <!-- 血糖统计 -->
+        <div class="report-section">
+          <h3>二、血糖数据统计</h3>
+          <table class="report-table">
+            <tr><th>指标</th><th>平均值</th><th>最高值</th><th>最低值</th><th>达标率</th><th>状态</th></tr>
+            <tr>
+              <td>空腹血糖 (mmol/L)</td>
+              <td id="bsFastingAvg">--</td>
+              <td id="bsFastingMax">--</td>
+              <td id="bsFastingMin">--</td>
+              <td id="bsFastingRate">--</td>
+              <td id="bsFastingStatus">--</td>
+            </tr>
+            <tr>
+              <td>餐后血糖 (mmol/L)</td>
+              <td id="bsPostAvg">--</td>
+              <td id="bsPostMax">--</td>
+              <td id="bsPostMin">--</td>
+              <td id="bsPostRate">--</td>
+              <td id="bsPostStatus">--</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- 体重与运动 -->
+        <div class="report-section">
+          <h3>三、体重与运动统计</h3>
+          <table class="report-table">
+            <tr><th>指标</th><th>数据</th><th>说明</th></tr>
+            <tr><td>平均体重</td><td id="weightAvg">--</td><td>报告周期内平均体重</td></tr>
+            <tr><td>体重变化</td><td id="weightChange">--</td><td>相比周期开始时的变化</td></tr>
+            <tr><td>运动天数</td><td id="exerciseDays">--</td><td>有运动记录的天数</td></tr>
+            <tr><td>平均运动时长</td><td id="exerciseAvg">--</td><td>每次运动平均分钟数</td></tr>
+            <tr><td>饮食健康天数</td><td id="dietGoodDays">--</td><td>饮食评价为"良好"的天数</td></tr>
+          </table>
+        </div>
+
+        <!-- 用药依从性 -->
+        <div class="report-section">
+          <h3>四、用药依从性</h3>
+          <table class="report-table">
+            <tr><th>指标</th><th>数据</th></tr>
+            <tr><td>在用药品数</td><td id="medTotal">--</td></tr>
+            <tr><td>应服药次数</td><td id="medExpected">--</td></tr>
+            <tr><td>实际服药次数</td><td id="medActual">--</td></tr>
+            <tr><td>用药依从率</td><td id="medCompliance">--</td></tr>
+          </table>
+        </div>
+
+        <!-- AI健康分析 -->
+        <div class="report-section">
+          <h3>五、AI健康分析与建议</h3>
+          <div style="background:#f8fafc;padding:16px;border-radius:8px;line-height:1.8;font-size:14px;white-space:pre-wrap" id="aiAnalysis">
+            正在生成AI分析...
+          </div>
+        </div>
+
+        <!-- 总结与目标 -->
+        <div class="report-section">
+          <h3>六、下一阶段目标</h3>
+          <div style="background:#eff6ff;padding:16px;border-radius:8px;line-height:1.8;font-size:14px" id="nextGoals">
+            --
+          </div>
+        </div>
+
+        <!-- 免责声明 -->
+        <div style="margin-top:30px;padding-top:20px;border-top:1px solid #e5e7eb;font-size:12px;color:#94a3b8;text-align:center">
+          <p>本报告由糖尿病预治智能助手系统自动生成，仅供健康管理参考，不能替代专业医疗诊断。</p>
+          <p>如有不适，请及时就医。报告生成时间：<span id="footerTime">--</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"></div>
+
+  <script src="js/common.js"></script>
+  <script>
+    Utils.renderNav('report.html');
+    Utils.renderFooter();
+
+    // 生成报告
+    async function generateReport() {
+      const range = parseInt(document.getElementById('reportRange').value);
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> 生成中...';
+
+      const checkins = (Storage.getCheckins() || []).slice(0, range);
+      const medRecords = Storage.get('medRecords') || [];
+      const medications = Storage.get('medications') || [];
+      const riskRecords = Storage.get('riskRecords') || [];
+
+      // 计算血糖统计
+      const fasting = checkins.filter(r => r.bloodSugar).map(r => parseFloat(r.bloodSugar));
+      const postprandial = checkins.filter(r => r.postprandial).map(r => parseFloat(r.postprandial));
+      const weights = checkins.filter(r => r.weight).map(r => parseFloat(r.weight));
+      const exercises = checkins.filter(r => r.exercise > 0);
+
+      const avg = arr => arr.length > 0 ? (arr.reduce((a,b) => a+b, 0) / arr.length).toFixed(1) : '--';
+      const max = arr => arr.length > 0 ? Math.max(...arr).toFixed(1) : '--';
+      const min = arr => arr.length > 0 ? Math.min(...arr).toFixed(1) : '--';
+
+      // 填充数据
+      const now = new Date();
+      const startDate = new Date(now.getTime() - range * 24 * 60 * 60 * 1000);
+      const dateStr = `${startDate.getMonth()+1}月${startDate.getDate()}日 - ${now.getMonth()+1}月${now.getDate()}日`;
+      
+      document.getElementById('reportDateRange').textContent = '报告周期：' + dateStr;
+      document.getElementById('reportGenerateTime').textContent = now.toLocaleString('zh-CN');
+      document.getElementById('footerTime').textContent = now.toLocaleString('zh-CN');
+      document.getElementById('infoRange').textContent = dateStr;
+      document.getElementById('infoCheckinDays').textContent = checkins.length + ' 天';
+      document.getElementById('infoMedRecords').textContent = medRecords.length + ' 条';
+      document.getElementById('infoRiskCount').textContent = riskRecords.length + ' 次';
+
+      // 血糖数据
+      document.getElementById('bsFastingAvg').textContent = avg(fasting);
+      document.getElementById('bsFastingMax').textContent = max(fasting);
+      document.getElementById('bsFastingMin').textContent = min(fasting);
+      const fastingRate = fasting.length > 0 ? Math.round(fasting.filter(v => v < 6.1).length / fasting.length * 100) : 0;
+      document.getElementById('bsFastingRate').textContent = fastingRate + '%';
+      const fastingAvgVal = parseFloat(avg(fasting));
+      document.getElementById('bsFastingStatus').innerHTML = fastingAvgVal < 6.1 ? '<span style="color:#10b981">✓ 正常</span>' : fastingAvgVal < 7.0 ? '<span style="color:#f59e0b">⚠ 偏高</span>' : '<span style="color:#ef4444">✗ 超标</span>';
+
+      document.getElementById('bsPostAvg').textContent = avg(postprandial);
+      document.getElementById('bsPostMax').textContent = max(postprandial);
+      document.getElementById('bsPostMin').textContent = min(postprandial);
+      const postRate = postprandial.length > 0 ? Math.round(postprandial.filter(v => v < 7.8).length / postprandial.length * 100) : 0;
+      document.getElementById('bsPostRate').textContent = postRate + '%';
+      const postAvgVal = parseFloat(avg(postprandial));
+      document.getElementById('bsPostStatus').innerHTML = postAvgVal < 7.8 ? '<span style="color:#10b981">✓ 正常</span>' : postAvgVal < 11.1 ? '<span style="color:#f59e0b">⚠ 偏高</span>' : '<span style="color:#ef4444">✗ 超标</span>';
+
+      // 体重与运动
+      document.getElementById('weightAvg').textContent = avg(weights) !== '--' ? avg(weights) + ' kg' : '--';
+      if (weights.length >= 2) {
+        const change = (weights[0] - weights[weights.length-1]).toFixed(1);
+        document.getElementById('weightChange').textContent = (change > 0 ? '↓ ' : change < 0 ? '↑ ' : '') + Math.abs(change) + ' kg';
+      } else {
+        document.getElementById('weightChange').textContent = '--';
+      }
+      document.getElementById('exerciseDays').textContent = exercises.length + ' 天';
+      const exerciseTimes = exercises.map(r => r.exercise);
+      document.getElementById('exerciseAvg').textContent = exerciseTimes.length > 0 ? Math.round(exerciseTimes.reduce((a,b) => a+b, 0) / exerciseTimes.length) + ' 分钟' : '--';
+      document.getElementById('dietGoodDays').textContent = checkins.filter(r => r.diet === 'good').length + ' 天';
+
+      // 用药
+      document.getElementById('medTotal').textContent = medications.length + ' 种';
+      let expectedPerDay = 0;
+      medications.forEach(m => { if (m.times) expectedPerDay += m.times.split(',').length; });
+      const expectedTotal = expectedPerDay * range;
+      const actualMed = medRecords.filter(r => new Date(r.date) >= startDate).length;
+      document.getElementById('medExpected').textContent = expectedTotal + ' 次';
+      document.getElementById('medActual').textContent = actualMed + ' 次';
+      document.getElementById('medCompliance').textContent = expectedTotal > 0 ? Math.round(actualMed / expectedTotal * 100) + '%' : '--';
+
+      // 健康评分
+      let score = 60;
+      if (fastingRate >= 80) score += 10;
+      else if (fastingRate >= 60) score += 5;
+      if (exercises.length >= range * 0.7) score += 10;
+      else if (exercises.length >= range * 0.5) score += 5;
+      if (checkins.filter(r => r.diet === 'good').length >= range * 0.6) score += 10;
+      if (checkins.length >= range * 0.8) score += 5;
+      if (expectedTotal > 0 && actualMed / expectedTotal >= 0.9) score += 5;
+      score = Math.min(score, 100);
+
+      const scoreCircle = document.getElementById('scoreCircle');
+      scoreCircle.textContent = score;
+      scoreCircle.style.background = score >= 85 ? '#10b981' : score >= 70 ? '#2563eb' : score >= 60 ? '#f59e0b' : '#ef4444';
+      document.getElementById('scoreLevel').textContent = score >= 85 ? '优秀 - 继续保持！' : score >= 70 ? '良好 - 还有提升空间' : score >= 60 ? '一般 - 需要加强管理' : '需改善 - 建议咨询医生';
+
+      // 显示报告
+      document.getElementById('reportEmpty').style.display = 'none';
+      document.getElementById('reportContent').style.display = 'block';
+      document.getElementById('printBtn').style.display = 'inline-block';
+
+      // AI生成分析
+      try {
+        const aiResult = await DifyAPI.runWorkflow({
+          type: 'checkin_analysis',
+          days: checkins.length,
+          avgFasting: avg(fasting),
+          avgPostprandial: avg(postprandial),
+          avgWeight: avg(weights),
+          checkinDays: checkins.length
+        });
+        if (aiResult && aiResult.result) {
+          document.getElementById('aiAnalysis').textContent = aiResult.result;
+        }
+      } catch (e) {
+        document.getElementById('aiAnalysis').textContent = 'AI分析生成失败，请检查Ollama服务是否正常运行。';
+      }
+
+      // 下一阶段目标
+      document.getElementById('nextGoals').innerHTML = `
+        <p><strong>1. 血糖管理：</strong>保持空腹血糖在 4.4-7.0 mmol/L，餐后血糖 < 10.0 mmol/L</p>
+        <p><strong>2. 运动目标：</strong>每周至少 150 分钟中等强度有氧运动，配合 2-3 次力量训练</p>
+        <p><strong>3. 饮食管理：</strong>控制每日总热量，碳水化合物占 50-60%，蛋白质 15-20%</p>
+        <p><strong>4. 用药依从：</strong>按时按量服药，不自行停药或调整剂量</p>
+        <p><strong>5. 定期监测：</strong>每日监测血糖，每周记录体重，每月复查糖化血红蛋白</p>
+      `;
+
+      btn.disabled = false;
+      btn.textContent = '重新生成';
+      Utils.toast('报告生成成功！', 'success');
+    }
+
+    // 打印报告
+    function printReport() {
+      window.print();
+    }
+  </script>
+</body>
+</html>

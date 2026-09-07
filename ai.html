@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能助手 - 糖尿病预治智能助手</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .ai-layout { display: grid; grid-template-columns: 240px 1fr; gap: 20px; height: calc(100vh - 140px); }
+    .sidebar { background: white; border-radius: 12px; padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+    .new-chat-btn { width: 100%; margin-bottom: 16px; }
+    .history-list { flex: 1; overflow-y: auto; }
+    .history-item {
+      padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px;
+      margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: all 0.2s;
+    }
+    .history-item:hover { background: #f1f5f9; }
+    .history-item.active { background: #eff6ff; color: var(--primary); font-weight: 600; }
+    .quick-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--border); }
+    .quick-action {
+      padding: 6px 12px; background: #f1f5f9; border-radius: 16px; font-size: 12px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .quick-action:hover { background: #e2e8f0; }
+    .capability-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px; }
+    .capability-card {
+      text-align: center; padding: 16px; background: #f8fafc; border-radius: 10px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .capability-card:hover { background: #eff6ff; transform: translateY(-2px); }
+    .capability-card .icon { font-size: 28px; margin-bottom: 8px; }
+    .capability-card h4 { font-size: 13px; margin-bottom: 4px; }
+    .capability-card p { font-size: 11px; color: var(--text-light); }
+  </style>
+</head>
+<body>
+  <nav class="navbar"></nav>
+
+  <div class="container">
+    <div class="ai-layout">
+      <!-- 侧边栏 -->
+      <div class="sidebar">
+        <button class="btn btn-primary new-chat-btn" onclick="newChat()">+ 新建对话</button>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;padding:0 8px">历史对话</div>
+        <div class="history-list" id="historyList">
+          <div style="text-align:center;padding:20px;color:var(--text-light);font-size:12px">暂无历史对话</div>
+        </div>
+        <div style="padding-top:12px;border-top:1px solid var(--border);margin-top:12px">
+          <div style="font-size:12px;color:var(--text-light);margin-bottom:8px">🤖 智能体能力</div>
+          <div style="font-size:11px;color:var(--text-light);line-height:1.8">
+            • 糖尿病知识问答<br>
+            • 风险评估预测<br>
+            • 个性化方案生成<br>
+            • 健康数据管理<br>
+            • 用药咨询指导
+          </div>
+        </div>
+      </div>
+
+      <!-- 聊天区域 -->
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="chat-avatar">🤖</div>
+          <div>
+            <h3>糖尿病智能助手</h3>
+            <p style="font-size:12px;opacity:0.9">基于DeepSeek大模型 · 随时为您服务</p>
+          </div>
+          <span class="tag" style="background:rgba(16,185,129,0.3);color:white;margin-left:auto">在线</span>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+          <!-- 欢迎界面 -->
+          <div id="welcomeScreen" style="text-align:center;padding:40px 20px">
+            <div style="font-size:64px;margin-bottom:16px">🩺</div>
+            <h2 style="margin-bottom:8px">您好，我是糖尿病智能助手</h2>
+            <p style="color:var(--text-light);margin-bottom:24px">我可以帮您解答糖尿病相关问题、评估风险、制定健康方案</p>
+            <div class="capability-grid">
+              <div class="capability-card" onclick="quickAsk('帮我评估一下糖尿病风险')">
+                <div class="icon">📊</div>
+                <h4>风险评估</h4>
+                <p>AI智能预测</p>
+              </div>
+              <div class="capability-card" onclick="quickAsk('给我制定一份糖尿病饮食方案')">
+                <div class="icon">🥗</div>
+                <h4>饮食方案</h4>
+                <p>个性化定制</p>
+              </div>
+              <div class="capability-card" onclick="quickAsk('糖尿病患者应该如何运动？')">
+                <div class="icon">🏃</div>
+                <h4>运动指导</h4>
+                <p>科学锻炼</p>
+              </div>
+              <div class="capability-card" onclick="quickAsk('血糖多少算正常？')">
+                <div class="icon">💬</div>
+                <h4>知识问答</h4>
+                <p>随时解答</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="quick-actions" id="quickActions">
+          <span class="quick-action" onclick="quickAsk('血糖多少算正常？')">血糖正常值</span>
+          <span class="quick-action" onclick="quickAsk('糖尿病能吃水果吗？')">能吃水果吗</span>
+          <span class="quick-action" onclick="quickAsk('如何预防糖尿病并发症？')">预防并发症</span>
+          <span class="quick-action" onclick="quickAsk('胰岛素有什么副作用？')">胰岛素副作用</span>
+          <span class="quick-action" onclick="quickAsk('帮我记录今天的血糖')">记录血糖</span>
+        </div>
+        
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" id="chatInput" placeholder="请输入您的问题，例如：糖尿病患者早餐吃什么好？" onkeypress="if(event.key==='Enter')sendMessage()">
+          <button class="btn btn-primary" onclick="sendMessage()">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer"></footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    Utils.initPage('ai.html');
+    
+    let conversations = Storage.get('aiConversations') || [];
+    let currentConvId = null;
+    let currentMessages = [];
+
+    // 渲染历史对话
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      if (conversations.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-light);font-size:12px">暂无历史对话</div>';
+        return;
+      }
+      list.innerHTML = conversations.map(c => `
+        <div class="history-item ${c.id === currentConvId ? 'active' : ''}" onclick="loadConversation('${c.id}')" title="${c.title}">
+          💬 ${c.title}
+        </div>
+      `).join('');
+    }
+
+    // Markdown渲染函数
+    function renderMarkdown(text) {
+      if (!text) return '';
+      let html = text;
+      
+      // 转义HTML
+      html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      
+      // 代码块
+      html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
+        return `<pre style="background:#f5f5f5;padding:12px;border-radius:8px;overflow-x:auto;font-size:13px"><code>${code.trim()}</code></pre>`;
+      });
+      
+      // 行内代码
+      html = html.replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:13px">$1</code>');
+      
+      // 标题
+      html = html.replace(/^### (.*$)/gm, '<h3 style="font-size:16px;font-weight:600;margin:12px 0 8px">$1</h3>');
+      html = html.replace(/^## (.*$)/gm, '<h2 style="font-size:18px;font-weight:600;margin:14px 0 10px">$1</h2>');
+      html = html.replace(/^# (.*$)/gm, '<h1 style="font-size:20px;font-weight:700;margin:16px 0 12px">$1</h1>');
+      
+      // 粗体
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      
+      // 斜体
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      
+      // 无序列表
+      html = html.replace(/^[-•] (.*$)/gm, '<li style="margin:4px 0">$1</li>');
+      html = html.replace(/(<li[^>]*>[\s\S]*?<\/li>)/g, '<ul style="padding-left:20px;margin:8px 0">$1</ul>');
+      
+      // 有序列表
+      html = html.replace(/^\d+\. (.*$)/gm, '<li style="margin:4px 0">$1</li>');
+      
+      // 链接
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#3b82f6;text-decoration:underline" target="_blank">$1</a>');
+      
+      // 换行
+      html = html.replace(/\n/g, '<br>');
+      
+      // 清理多余的空行
+      html = html.replace(/(<br>\s*){3,}/g, '<br><br>');
+      
+      return html;
+    }
+
+    // 新建对话
+    function newChat() {
+      currentConvId = null;
+      currentMessages = [];
+      document.getElementById('welcomeScreen').style.display = 'block';
+      document.getElementById('quickActions').style.display = 'flex';
+      document.querySelectorAll('.message').forEach(m => m.remove());
+      renderHistory();
+    }
+
+    // 加载对话
+    function loadConversation(id) {
+      const conv = conversations.find(c => c.id === id);
+      if (!conv) return;
+      currentConvId = id;
+      currentMessages = conv.messages;
+      
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('quickActions').style.display = 'none';
+      document.querySelectorAll('.message').forEach(m => m.remove());
+      
+      conv.messages.forEach(m => addMessage(m.role, m.content, false));
+      renderHistory();
+    }
+
+    // 快捷提问
+    function quickAsk(question) {
+      document.getElementById('chatInput').value = question;
+      sendMessage();
+    }
+
+    // 发送消息
+    async function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      // 隐藏欢迎界面
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('quickActions').style.display = 'none';
+      
+      addMessage('user', text);
+      input.value = '';
+      
+      // 显示正在输入
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message ai';
+      typingDiv.id = 'typingIndicator';
+      typingDiv.innerHTML = `
+        <div class="message-avatar">🤖</div>
+        <div class="message-bubble">
+          <span style="display:inline-block;animation:bounce 1.4s infinite">●</span>
+          <span style="display:inline-block;animation:bounce 1.4s infinite 0.2s">●</span>
+          <span style="display:inline-block;animation:bounce 1.4s infinite 0.4s">●</span>
+        </div>
+      `;
+      document.getElementById('chatMessages').appendChild(typingDiv);
+      document.getElementById('chatMessages').scrollTop = 99999;
+      
+      // 创建AI消息元素（打字机效果）
+      const aiDiv = document.createElement('div');
+      aiDiv.className = 'message ai';
+      aiDiv.innerHTML = `
+        <div class="message-avatar">🤖</div>
+        <div class="message-bubble"><span class="ai-content"></span><span class="ai-cursor" style="animation:blink 1s infinite">|</span></div>
+      `;
+      document.getElementById('chatMessages').appendChild(aiDiv);
+      const contentEl = aiDiv.querySelector('.ai-content');
+      document.getElementById('typingIndicator')?.remove();
+      document.getElementById('chatMessages').scrollTop = 99999;
+      
+      // 调用AI API（流式输出）
+      let reply = '';
+      try {
+        const result = await DifyAPI.chatMessageStream(text, (token, full) => {
+          reply = full;
+          contentEl.innerHTML = renderMarkdown(full);
+          document.getElementById('chatMessages').scrollTop = 99999;
+        });
+        reply = result.answer;
+        contentEl.innerHTML = renderMarkdown(reply);
+      } catch (error) {
+        console.error('AI API error, using fallback:', error);
+        reply = generateAIReply(text);
+        contentEl.innerHTML = renderMarkdown(reply);
+      }
+      // 移除光标
+      const cursor = aiDiv.querySelector('.ai-cursor');
+      if (cursor) cursor.remove();
+      
+      // 保存对话
+      currentMessages.push({ role: 'user', content: text });
+      currentMessages.push({ role: 'ai', content: reply });
+      
+      if (!currentConvId) {
+        currentConvId = 'conv_' + Date.now();
+        conversations.unshift({
+          id: currentConvId,
+          title: text.substring(0, 20) + (text.length > 20 ? '...' : ''),
+          messages: currentMessages,
+          createdAt: new Date().toISOString()
+        });
+      } else {
+        const conv = conversations.find(c => c.id === currentConvId);
+        if (conv) conv.messages = currentMessages;
+      }
+      
+      // 只保留最近20条对话
+      if (conversations.length > 20) conversations = conversations.slice(0, 20);
+      Storage.set('aiConversations', conversations);
+      renderHistory();
+    }
+
+    // 生成AI回复
+    function generateAIReply(question) {
+      const q = question.toLowerCase();
+      
+      if (q.includes('风险') || q.includes('评估') || q.includes('预测')) {
+        return `好的，我来帮您评估糖尿病风险。\n\n根据您的情况，我需要了解以下信息：\n\n1. **年龄**：您今年多大？\n2. **身高体重**：BMI是多少？\n3. **家族史**：直系亲属是否有糖尿病患者？\n4. **血压**：血压是否正常？\n5. **生活方式**：运动频率和饮食习惯如何？\n\n您可以直接告诉我这些信息，或者点击页面上的"风险评估"功能进行详细评估。\n\n**一般来说，以下人群属于糖尿病高危人群：**\n• 年龄≥40岁\n• BMI≥24（超重）或≥28（肥胖）\n• 有糖尿病家族史\n• 高血压或血脂异常\n• 久坐不动的生活方式\n• 有妊娠糖尿病史\n\n您想先从哪个方面开始了解？`;
+      }
+      if (q.includes('饮食') || q.includes('吃') || q.includes('食谱') || q.includes('早餐')) {
+        return `为您推荐一份糖尿病友好的饮食方案：\n\n**🥗 饮食原则**\n1. 控制总热量，维持健康体重\n2. 碳水化合物占45-55%，选择低GI食物\n3. 蛋白质占15-20%，优选优质蛋白\n4. 脂肪占25-30%，减少饱和脂肪\n\n**🍽️ 一日食谱示例**\n\n**早餐**（约400千卡）\n• 全麦面包2片\n• 水煮蛋1个\n• 无糖豆浆250ml\n• 凉拌黄瓜\n\n**午餐**（约600千卡）\n• 糙米饭100g\n• 清蒸鱼100g\n• 蒜蓉西兰花200g\n• 番茄蛋汤\n\n**晚餐**（约450千卡）\n• 杂粮粥1碗\n• 鸡胸肉80g\n• 炒时蔬200g\n\n**加餐**（约150千卡）\n• 上午：原味坚果15g\n• 下午：苹果1个\n\n**⚠️ 注意事项**\n• 定时定量，少食多餐\n• 避免精制糖和高糖水果\n• 多吃蔬菜，增加膳食纤维\n• 烹调方式以蒸、煮、炖为主\n\n需要我根据您的具体情况调整方案吗？`;
+      }
+      if (q.includes('运动') || q.includes('锻炼')) {
+        return `糖尿病患者运动指南：\n\n**🏃‍♂️ 有氧运动**\n• 类型：快走、慢跑、游泳、骑自行车\n• 频率：每周至少150分钟，分5天进行\n• 强度：中等强度（能说话但不能唱歌）\n• 心率：（220-年龄）× 60%-70%\n\n**💪 力量训练**\n• 频率：每周2-3次，间隔至少48小时\n• 内容：上肢、下肢、核心肌群\n• 每组8-12次，2-3组\n\n**🧘 柔韧性训练**\n• 每日拉伸10分钟\n• 重点：大腿、腰背、肩颈\n\n**⚠️ 运动注意事项**\n1. 运动前监测血糖，<5.6mmol/L先加餐\n2. 随身携带糖果，预防低血糖\n3. 避免空腹运动，餐后1-2小时最佳\n4. 穿舒适的鞋袜，保护足部\n5. 运动后监测血糖，了解运动效果\n6. 循序渐进，持之以恒\n\n**🎯 运动益处**\n• 提高胰岛素敏感性\n• 帮助控制体重\n• 改善心血管健康\n• 缓解压力，改善心情\n\n您目前的运动习惯是怎样的？我可以帮您制定更具体的计划。`;
+      }
+      if (q.includes('血糖') || q.includes('正常')) {
+        return `血糖正常范围参考：\n\n**📊 血糖标准值**\n\n| 检测项目 | 正常范围 | 糖尿病诊断 |\n|---|---|---|\n| 空腹血糖 | 3.9-6.1 mmol/L | ≥7.0 mmol/L |\n| 餐后2小时 | <7.8 mmol/L | ≥11.1 mmol/L |\n| 随机血糖 | - | ≥11.1 mmol/L |\n| 糖化血红蛋白 | <6.0% | ≥6.5% |\n\n**⚠️ 糖尿病前期**\n• 空腹血糖受损：6.1-7.0 mmol/L\n• 糖耐量异常：7.8-11.1 mmol/L\n\n这两种情况都需要积极干预，有机会逆转！\n\n**📝 监测建议**\n• 血糖控制良好：每周监测1-2天\n• 血糖不稳定：每天监测4-7次\n• 糖化血红蛋白：每3个月检查一次\n\n**💡 小贴士**\n• 采血前用温水洗手，酒精消毒后待干\n• 轮换采血部位，避免同一位置反复穿刺\n• 记录监测结果，便于复诊时参考\n\n您的血糖值是多少？我可以帮您分析。`;
+      }
+      if (q.includes('水果')) {
+        return `糖尿病患者**可以吃水果**，但需要注意选择和量：\n\n**✅ 推荐水果（低GI）**\n• 苹果、梨：GI约36-38\n• 柚子、橙子：GI约25-40\n• 草莓、蓝莓：GI约40\n• 樱桃：GI仅22\n• 猕猴桃：GI约52\n\n**⚠️ 限量水果（中GI）**\n• 香蕉、芒果：GI约55\n• 葡萄：GI约43-53\n\n**❌ 避免水果（高GI）**\n• 荔枝、龙眼：高糖\n• 榴莲：高热量高糖\n• 大枣：含糖量高\n\n**📏 食用原则**\n1. **控制量**：每次100-200克（约一个拳头大小）\n2. **选时机**：两餐之间（上午10点、下午3点）\n3. **看血糖**：血糖控制不佳时暂时不吃\n4. **整果吃**：不要榨汁，保留膳食纤维\n5. **做记录**：吃后2小时测血糖，了解个体反应\n\n**💡 温馨提示**\n水果富含维生素、矿物质和膳食纤维，对健康有益。关键是选择低GI品种、控制摄入量、选择合适时机。\n\n您平时喜欢吃什么水果？我可以帮您分析是否适合。`;
+      }
+      if (q.includes('并发症')) {
+        return `糖尿病并发症的预防非常重要：\n\n**🔴 急性并发症**\n• 糖尿病酮症酸中毒\n• 高渗高血糖综合征\n• 低血糖\n\n**🟡 慢性并发症**\n\n**1. 微血管并发症**\n• 糖尿病肾病：可致肾衰竭\n• 糖尿病视网膜病变：可致失明\n• 糖尿病神经病变：感觉异常、疼痛\n\n**2. 大血管并发症**\n• 冠心病、心肌梗死\n• 脑卒中\n• 外周动脉疾病\n\n**3. 其他**\n• 糖尿病足：可致截肢\n• 感染风险增加\n• 认知功能下降\n\n**🛡️ 预防措施**\n\n**血糖控制**\n• 糖化血红蛋白<7%\n• 避免血糖大幅波动\n\n**血压管理**\n• 目标<130/80 mmHg\n• 低盐饮食\n\n**血脂管理**\n• LDL-C<2.6 mmol/L\n• 定期检查\n\n**定期筛查**\n• 眼底检查：每年1次\n• 尿微量白蛋白：每年1次\n• 足部检查：每季度1次\n• 神经病变筛查：每年1次\n\n**生活方式**\n• 戒烟限酒\n• 规律运动\n• 健康饮食\n• 控制体重\n\n早期发现、早期干预是预防并发症的关键。您目前有做定期检查吗？`;
+      }
+      if (q.includes('胰岛素') || q.includes('药')) {
+        return `关于糖尿病药物的介绍：\n\n**💉 胰岛素**\n\n**种类：**\n1. **速效胰岛素**：餐前注射，控制餐后血糖\n2. **短效胰岛素**：餐前30分钟注射\n3. **中效胰岛素**：每日1-2次，控制基础血糖\n4. **长效胰岛素**：每日1次，提供基础胰岛素\n5. **预混胰岛素**：速效+中效混合\n\n**常见副作用：**\n• 低血糖（最常见）\n• 体重增加\n• 注射部位脂肪增生\n• 过敏反应（罕见）\n\n**💊 口服降糖药**\n\n1. **二甲双胍**：一线用药，改善胰岛素抵抗\n2. **磺脲类**：促进胰岛素分泌\n3. **格列奈类**：餐时血糖调节剂\n4. **α-糖苷酶抑制剂**：延缓碳水吸收\n5. **DPP-4抑制剂**：安全，低血糖风险低\n6. **SGLT-2抑制剂**：排糖利尿，心血管获益\n7. **GLP-1受体激动剂**：减重效果好\n\n**⚠️ 用药注意事项**\n• 遵医嘱用药，不自行调整剂量\n• 了解药物的作用时间和低血糖风险\n• 定期监测血糖和肝肾功能\n• 注意药物相互作用\n• 随身携带糖果，预防低血糖\n\n**温馨提示**：具体用药方案需要医生根据您的病情制定，请勿自行用药或停药。`;
+      }
+      if (q.includes('记录') || q.includes('血糖')) {
+        return `好的，我来帮您记录血糖数据。\n\n请告诉我以下信息：\n\n1. **测量时间**：空腹/餐后2小时/睡前？\n2. **血糖值**：多少 mmol/L？\n3. **测量日期**：今天还是其他时间？\n\n例如您可以说："今天空腹血糖5.6"\n\n**📊 血糖控制目标参考**\n\n| 人群 | 空腹 | 餐后2小时 | 糖化血红蛋白 |\n|---|---|---|---|\n| 一般成人 | 4.4-7.0 | <10.0 | <7.0% |\n| 老年人 | <8.0 | <12.0 | <7.5% |\n| 孕妇 | 3.3-5.3 | <6.7 | <6.0% |\n\n**💡 记录小贴士**\n• 固定时间测量，便于对比\n• 记录饮食、运动等影响因素\n• 建立血糖日记，复诊时带给医生\n• 异常值及时标注原因\n\n您可以使用"健康打卡"功能系统记录血糖数据，我会为您分析趋势。`;
+      }
+      
+      return `感谢您的提问！关于"${question}"，我来为您解答：\n\n糖尿病是一种常见的慢性代谢性疾病，主要特征是血糖升高。长期高血糖会导致多种并发症，但通过科学管理，完全可以控制病情、正常生活。\n\n**📌 核心管理要点：**\n\n1. **饮食管理**：控制总热量，选择低GI食物，定时定量\n2. **规律运动**：每周150分钟中等强度运动\n3. **血糖监测**：定期监测，了解血糖变化\n4. **遵医嘱用药**：不自行调整药物\n5. **定期复查**：糖化血红蛋白、眼底、肾功能等\n6. **心理健康**：保持积极心态\n\n**我可以帮您：**\n• 解答糖尿病相关知识\n• 评估糖尿病风险\n• 制定个性化饮食运动方案\n• 分析血糖监测数据\n• 提供用药咨询指导\n\n请问您具体想了解哪方面的内容？或者您可以点击页面上的快捷功能开始使用。\n\n**温馨提示**：我提供的建议仅供参考，不能替代专业医疗诊断。如有不适请及时就医。`;
+    }
+
+    // 添加消息
+    function addMessage(type, text, save = true) {
+      const messages = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = 'message ' + (type === 'user' ? 'user' : 'ai');
+      const avatar = type === 'user' ? '🧑' : '🤖';
+      div.innerHTML = `
+        <div class="message-avatar">${avatar}</div>
+        <div class="message-bubble">${type === 'ai' ? renderMarkdown(text) : text.replace(/\n/g, '<br>')}</div>
+      `;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    // 初始化
+    renderHistory();
+  </script>
+  <style>
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .ai-cursor {
+      font-weight: 300;
+      margin-left: 2px;
+    }
+  </style>
+</body>
+</html>

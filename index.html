@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>糖尿病预治智能助手 - 首页</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar"></nav>
+
+  <div class="container">
+    <!-- 轮播图 -->
+    <div class="carousel" id="carousel">
+      <div class="carousel-slide active" style="background: linear-gradient(135deg, #2563eb, #7c3aed);">
+        <div>
+          <h2>AI驱动的糖尿病智能管理</h2>
+          <p>融合DeepSeek大模型与Dify智能体技术，为您提供精准的糖尿病风险预测和个性化健康方案</p>
+          <button class="btn btn-lg" style="background:white;color:#2563eb" onclick="window.location.href='risk.html'">立即评估风险 →</button>
+        </div>
+      </div>
+      <div class="carousel-slide" style="background: linear-gradient(135deg, #059669, #10b981);">
+        <div>
+          <h2>名医在线 随时咨询</h2>
+          <p>汇聚全国三甲医院内分泌科专家，为您提供专业、权威的糖尿病诊疗建议</p>
+          <button class="btn btn-lg" style="background:white;color:#059669" onclick="window.location.href='doctor.html'">开始咨询 →</button>
+        </div>
+      </div>
+      <div class="carousel-slide" style="background: linear-gradient(135deg, #d97706, #f59e0b);">
+        <div>
+          <h2>个性化生活方案定制</h2>
+          <p>根据您的身体数据和生活习惯，AI智能生成专属饮食、运动和监测方案</p>
+          <button class="btn btn-lg" style="background:white;color:#d97706" onclick="window.location.href='plan.html'">获取方案 →</button>
+        </div>
+      </div>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+
+    <!-- 功能模块入口 -->
+    <div class="grid grid-4" style="margin-bottom:24px">
+      <div class="card" style="text-align:center;cursor:pointer" onclick="window.location.href='risk.html'">
+        <div style="font-size:40px;margin-bottom:10px">📊</div>
+        <h3 style="font-size:16px;margin-bottom:6px">风险预测</h3>
+        <p style="font-size:13px;color:var(--text-light)">AI智能评估糖尿病风险</p>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer" onclick="window.location.href='statistics.html'">
+        <div style="font-size:40px;margin-bottom:10px">📈</div>
+        <h3 style="font-size:16px;margin-bottom:6px">数据统计</h3>
+        <p style="font-size:13px;color:var(--text-light)">血糖趋势可视化分析</p>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer" onclick="window.location.href='medication.html'">
+        <div style="font-size:40px;margin-bottom:10px">💊</div>
+        <h3 style="font-size:16px;margin-bottom:6px">用药管理</h3>
+        <p style="font-size:13px;color:var(--text-light)">用药提醒与依从性统计</p>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer" onclick="window.location.href='plan.html'">
+        <div style="font-size:40px;margin-bottom:10px">🥗</div>
+        <h3 style="font-size:16px;margin-bottom:6px">生活方案</h3>
+        <p style="font-size:13px;color:var(--text-light)">个性化饮食运动指导</p>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer" onclick="window.location.href='checkin.html'">
+        <div style="font-size:40px;margin-bottom:10px">✅</div>
+        <h3 style="font-size:16px;margin-bottom:6px">健康打卡</h3>
+        <p style="font-size:13px;color:var(--text-light)">每日健康数据记录</p>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer" onclick="window.location.href='report.html'">
+        <div style="font-size:40px;margin-bottom:10px">📋</div>
+        <h3 style="font-size:16px;margin-bottom:6px">健康报告</h3>
+        <p style="font-size:13px;color:var(--text-light)">周/月报告生成导出</p>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer" onclick="window.location.href='doctor.html'">
+        <div style="font-size:40px;margin-bottom:10px">👨‍⚕️</div>
+        <h3 style="font-size:16px;margin-bottom:6px">医师咨询</h3>
+        <p style="font-size:13px;color:var(--text-light)">在线名医一对一交流</p>
+      </div>
+      <div class="card" style="text-align:center;cursor:pointer" onclick="window.location.href='ai.html'">
+        <div style="font-size:40px;margin-bottom:10px">🤖</div>
+        <h3 style="font-size:16px;margin-bottom:6px">智能助手</h3>
+        <p style="font-size:13px;color:var(--text-light)">全天候AI健康顾问</p>
+      </div>
+    </div>
+
+    <!-- 统计数据 -->
+    <div class="grid grid-4" style="margin-bottom:24px">
+      <div class="stat-card">
+        <div class="stat-icon blue">📈</div>
+        <div class="stat-info">
+          <h3 id="statUsers">12,580</h3>
+          <p>累计服务用户</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info">
+          <h3 id="statAssess">8,932</h3>
+          <p>风险评估次数</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">📋</div>
+        <div class="stat-info">
+          <h3 id="statPlans">6,745</h3>
+          <p>生成健康方案</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">💬</div>
+        <div class="stat-info">
+          <h3 id="statConsult">15,230</h3>
+          <p>咨询对话次数</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-3">
+      <!-- 糖尿病科普 -->
+      <div class="card" style="grid-column: span 2">
+        <div class="card-title"><span class="icon">📚</span>糖尿病科普</div>
+        <div class="grid grid-2" style="gap:16px">
+          <div style="padding:16px;background:#f0f9ff;border-radius:10px">
+            <h4 style="color:#0369a1;margin-bottom:8px">什么是糖尿病？</h4>
+            <p style="font-size:13px;color:var(--text-light);line-height:1.7">糖尿病是一组以高血糖为特征的代谢性疾病。高血糖则是由于胰岛素分泌缺陷或其生物作用受损，或两者兼有引起。长期存在的高血糖，导致各种组织，特别是眼、肾、心脏、血管、神经的慢性损害、功能障碍。</p>
+          </div>
+          <div style="padding:16px;background:#f0fdf4;border-radius:10px">
+            <h4 style="color:#166534;margin-bottom:8px">糖尿病的类型</h4>
+            <p style="font-size:13px;color:var(--text-light);line-height:1.7"><strong>1型糖尿病：</strong>胰岛素绝对缺乏，多发生于青少年。<br><strong>2型糖尿病：</strong>胰岛素抵抗为主，占患者90%以上。<br><strong>妊娠糖尿病：</strong>妊娠期间发生的糖代谢异常。<br><strong>其他特殊类型：</strong>由特定病因引起。</p>
+          </div>
+          <div style="padding:16px;background:#fffbeb;border-radius:10px">
+            <h4 style="color:#92400e;margin-bottom:8px">糖尿病的危害</h4>
+            <p style="font-size:13px;color:var(--text-light);line-height:1.7">糖尿病并发症包括：心血管疾病（冠心病、脑卒中）、糖尿病肾病（可致肾衰竭）、糖尿病视网膜病变（可致失明）、糖尿病神经病变、糖尿病足（可致截肢）等。早期干预可显著降低并发症风险。</p>
+          </div>
+          <div style="padding:16px;background:#fef2f2;border-radius:10px">
+            <h4 style="color:#991b1b;margin-bottom:8px">如何预防？</h4>
+            <p style="font-size:13px;color:var(--text-light);line-height:1.7">• 保持健康体重，BMI控制在18.5-23.9<br>• 每周至少150分钟中等强度运动<br>• 均衡饮食，减少精制糖摄入<br>• 戒烟限酒，规律作息<br>• 定期体检，监测血糖水平</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 健康资讯 -->
+      <div class="card">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span><span class="icon">📰</span>健康资讯</span>
+          <a href="news.html" style="font-size:13px;color:var(--primary);font-weight:normal">更多 →</a>
+        </div>
+        <div id="newsList"></div>
+      </div>
+    </div>
+
+    <!-- 快速入口 -->
+    <div class="card" style="margin-top:20px">
+      <div class="card-title"><span class="icon">⚡</span>快速功能</div>
+      <div class="grid grid-3" style="gap:16px">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#f8fafc;border-radius:10px;cursor:pointer" onclick="window.location.href='checkin.html'">
+          <span style="font-size:28px">✅</span>
+          <div>
+            <h4 style="font-size:14px">每日打卡</h4>
+            <p style="font-size:12px;color:var(--text-light)">记录饮食运动，追踪健康状态</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#f8fafc;border-radius:10px;cursor:pointer" onclick="window.location.href='profile.html'">
+          <span style="font-size:28px">👤</span>
+          <div>
+            <h4 style="font-size:14px">个人中心</h4>
+            <p style="font-size:12px;color:var(--text-light)">管理健康档案，查看历史记录</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#f8fafc;border-radius:10px;cursor:pointer" onclick="window.location.href='admin.html'">
+          <span style="font-size:28px">⚙️</span>
+          <div>
+            <h4 style="font-size:14px">智能管理</h4>
+            <p style="font-size:12px;color:var(--text-light)">AI驱动的健康数据管理</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="footer"></footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    // 初始化页面
+    Utils.initPage('index.html');
+
+    // 轮播图
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dotsContainer = document.getElementById('carouselDots');
+    
+    slides.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => goToSlide(i);
+      dotsContainer.appendChild(dot);
+    });
+
+    function goToSlide(index) {
+      slides[currentSlide].classList.remove('active');
+      document.querySelectorAll('.carousel-dot')[currentSlide].classList.remove('active');
+      currentSlide = index;
+      slides[currentSlide].classList.add('active');
+      document.querySelectorAll('.carousel-dot')[currentSlide].classList.add('active');
+    }
+
+    setInterval(() => {
+      goToSlide((currentSlide + 1) % slides.length);
+    }, 5000);
+
+    // 渲染健康资讯
+    const newsList = document.getElementById('newsList');
+    MockData.articles.slice(0, 4).forEach(article => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer';
+      div.onclick = () => window.location.href = 'news.html';
+      div.innerHTML = `
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:24px">${article.icon}</span>
+          <div style="flex:1">
+            <h4 style="font-size:14px;margin-bottom:4px">${article.title}</h4>
+            <p style="font-size:12px;color:var(--text-light)">${article.summary}</p>
+            <div style="display:flex;gap:10px;margin-top:6px;font-size:11px;color:var(--text-light)">
+              <span class="tag tag-blue">${article.category}</span>
+              <span>👁 ${article.views}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      newsList.appendChild(div);
+    });
+
+    // 数字动画
+    function animateNumber(element, target) {
+      let current = 0;
+      const step = target / 50;
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        element.textContent = Math.floor(current).toLocaleString();
+      }, 30);
+    }
+
+    animateNumber(document.getElementById('statUsers'), 12580);
+    animateNumber(document.getElementById('statAssess'), 8932);
+    animateNumber(document.getElementById('statPlans'), 6745);
+    animateNumber(document.getElementById('statConsult'), 15230);
+  </script>
+</body>
+</html>
