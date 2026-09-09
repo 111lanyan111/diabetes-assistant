@@ -371,9 +371,12 @@ const Utils = {
     
     const links = [
       { href: 'index.html', label: '首页', icon: '🏠' },
+      { href: 'risk.html', label: '风险预测', icon: '⚠️' },
+      { href: 'doctor.html', label: '医师咨询', icon: '👨‍⚕️' },
       { href: 'statistics.html', label: '数据统计', icon: '📈' },
       { href: 'medication.html', label: '用药管理', icon: '💊' },
       { href: 'plan.html', label: '生活方案', icon: '📋' },
+      { href: 'news.html', label: '健康资讯', icon: '📰' },
       { href: 'checkin.html', label: '健康打卡', icon: '✅' },
       { href: 'report.html', label: '健康报告', icon: '📋' },
       { href: 'ai.html', label: '智能助手', icon: '🤖' },

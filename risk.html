@@ -31,161 +31,151 @@
 
       <!-- 步骤指示器 -->
       <div class="step-indicator">
-        <div class="step-dot active" id="step1">1</div>
+        <div class="step-dot active" id="dot1">1</div>
         <div class="step-line" id="line1"></div>
-        <div class="step-dot" id="step2">2</div>
+        <div class="step-dot" id="dot2">2</div>
         <div class="step-line" id="line2"></div>
-        <div class="step-dot" id="step3">3</div>
+        <div class="step-dot" id="dot3">3</div>
       </div>
 
-      <!-- 表单区域 -->
-      <div id="formArea" class="risk-form">
-        <!-- 第一步：基本信息 -->
-        <div id="page1">
-          <h3 style="margin-bottom:20px;text-align:center">基本信息</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">年龄 *</label>
-              <input type="number" class="form-input" id="age" placeholder="请输入年龄" min="1" max="120">
-            </div>
-            <div class="form-group">
-              <label class="form-label">性别 *</label>
-              <select class="form-select" id="gender">
-                <option value="">请选择</option>
-                <option value="male">男</option>
-                <option value="female">女</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">身高 (cm) *</label>
-              <input type="number" class="form-input" id="height" placeholder="例如：170" min="50" max="250">
-            </div>
-            <div class="form-group">
-              <label class="form-label">体重 (kg) *</label>
-              <input type="number" class="form-input" id="weight" placeholder="例如：65" min="20" max="300" step="0.1">
-            </div>
+      <!-- 步骤1：基本信息 -->
+      <div id="step1" class="risk-form">
+        <h3 style="margin-bottom:20px;text-align:center">基本信息</h3>
+        <div class="form-group">
+          <label class="form-label">年龄</label>
+          <input type="number" class="form-input" id="age" placeholder="请输入年龄" min="1" max="120">
+        </div>
+        <div class="form-group">
+          <label class="form-label">性别</label>
+          <select class="form-input" id="gender">
+            <option value="">请选择性别</option>
+            <option value="male">男</option>
+            <option value="female">女</option>
+          </select>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">身高(cm)</label>
+            <input type="number" class="form-input" id="height" placeholder="例如：170" min="50" max="250">
           </div>
           <div class="form-group">
-            <label class="form-label">糖尿病家族史 *</label>
-            <select class="form-select" id="familyHistory">
-              <option value="no">无（直系亲属均无糖尿病）</option>
-              <option value="yes">有（父母、兄弟姐妹等直系亲属患有糖尿病）</option>
-            </select>
-          </div>
-          <div style="text-align:right;margin-top:20px">
-            <button class="btn btn-primary" onclick="nextStep(1)">下一步 →</button>
+            <label class="form-label">体重(kg)</label>
+            <input type="number" class="form-input" id="weight" placeholder="例如：65" min="20" max="300" step="0.1">
           </div>
         </div>
+        <div class="form-group">
+          <label class="form-label">糖尿病家族史</label>
+          <select class="form-input" id="familyHistory">
+            <option value="">请选择</option>
+            <option value="yes">有（父母、兄弟姐妹等直系亲属）</option>
+            <option value="no">无</option>
+          </select>
+        </div>
+        <div style="text-align:center;margin-top:24px">
+          <button class="btn btn-primary" onclick="nextStep(1)">下一步</button>
+        </div>
+      </div>
 
-        <!-- 第二步：生活方式 -->
-        <div id="page2" style="display:none">
-          <h3 style="margin-bottom:20px;text-align:center">生活方式与健康状况</h3>
-          <div class="form-group">
-            <label class="form-label">血压状况</label>
-            <select class="form-select" id="bloodPressure">
-              <option value="normal">正常（收缩压<120且舒张压<80）</option>
-              <option value="borderline">临界高血压（120-139/80-89）</option>
-              <option value="high">高血压（≥140/90）</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">运动频率</label>
-            <select class="form-select" id="exercise">
-              <option value="regular">经常运动（每周中等强度运动≥150分钟）</option>
-              <option value="sometimes">偶尔运动（每周运动1-2次）</option>
-              <option value="rare">很少或几乎不运动</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">饮食习惯</label>
-            <select class="form-select" id="diet">
-              <option value="healthy">健康均衡（蔬菜水果多，少糖少油）</option>
-              <option value="normal">一般（偶尔高糖高脂饮食）</option>
-              <option value="unhealthy">高糖高脂（经常吃甜食、油炸食品）</option>
-            </select>
-          </div>
+      <!-- 步骤2：生活方式 -->
+      <div id="step2" class="risk-form" style="display:none">
+        <h3 style="margin-bottom:20px;text-align:center">生活方式与健康状况</h3>
+        <div class="form-group">
+          <label class="form-label">血压状况</label>
+          <select class="form-input" id="bloodPressure">
+            <option value="">请选择</option>
+            <option value="normal">正常（收缩压&lt;120且舒张压&lt;80）</option>
+            <option value="borderline">临界高血压（120-139/80-89）</option>
+            <option value="high">高血压（≥140/90）</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">运动情况</label>
+          <select class="form-input" id="exercise">
+            <option value="">请选择</option>
+            <option value="regular">经常运动（每周中等强度运动≥150分钟）</option>
+            <option value="sometimes">偶尔运动（每周运动1-2次）</option>
+            <option value="rarely">很少运动（几乎不运动）</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">饮食习惯</label>
+          <select class="form-input" id="diet">
+            <option value="">请选择</option>
+            <option value="healthy">健康饮食（均衡营养，少糖少油）</option>
+            <option value="normal">一般（偶尔高糖高脂饮食）</option>
+            <option value="unhealthy">不健康（经常高糖高脂饮食）</option>
+          </select>
+        </div>
+        <div class="grid grid-2">
           <div class="form-group">
             <label class="form-label">吸烟情况</label>
-            <select class="form-select" id="smoking">
+            <select class="form-input" id="smoking">
               <option value="no">不吸烟</option>
-              <option value="yes">目前吸烟</option>
+              <option value="yes">吸烟</option>
               <option value="quit">已戒烟</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">饮酒情况</label>
-            <select class="form-select" id="drinking">
+            <select class="form-input" id="drinking">
               <option value="no">不饮酒</option>
               <option value="moderate">适量饮酒（每周1-3次）</option>
               <option value="heavy">经常饮酒（每周4次以上）</option>
             </select>
           </div>
-          <div style="display:flex;justify-content:space-between;margin-top:20px">
-            <button class="btn btn-outline" onclick="prevStep(2)">← 上一步</button>
-            <button class="btn btn-primary" onclick="nextStep(2)">下一步 →</button>
-          </div>
         </div>
-
-        <!-- 第三步：确认提交 -->
-        <div id="page3" style="display:none">
-          <h3 style="margin-bottom:20px;text-align:center">确认信息并提交</h3>
-          <div id="confirmInfo" style="background:#f8fafc;padding:20px;border-radius:10px;margin-bottom:20px"></div>
-          <div class="alert alert-info">
-            <strong>温馨提示：</strong>本评估基于AI模型分析，结果仅供参考，不能替代专业医疗诊断。如有不适请及时就医。
-          </div>
-          <div style="display:flex;justify-content:space-between">
-            <button class="btn btn-outline" onclick="prevStep(3)">← 上一步</button>
-            <button class="btn btn-primary btn-lg" onclick="submitAssessment()" id="submitBtn">
-              <span id="submitText">开始AI评估</span>
-            </button>
-          </div>
+        <div style="text-align:center;margin-top:24px">
+          <button class="btn btn-outline" onclick="prevStep(2)">上一步</button>
+          <button class="btn btn-primary" onclick="nextStep(2)">下一步</button>
         </div>
       </div>
 
-      <!-- 结果区域 -->
-      <div id="resultArea" class="risk-result">
-        <div style="text-align:center;margin-bottom:30px">
-          <div class="gauge-container">
-            <div class="gauge-bg" id="gaugeBg"></div>
-            <div class="gauge-inner">
-              <div style="font-size:42px;font-weight:700" id="resultScore">0</div>
-              <div style="font-size:13px;color:var(--text-light)">风险分值</div>
-            </div>
-          </div>
-          <div style="margin-top:16px">
-            <span class="tag" id="resultLevel" style="font-size:18px;padding:8px 20px">--</span>
+      <!-- 步骤3：确认并提交 -->
+      <div id="step3" class="risk-form" style="display:none">
+        <h3 style="margin-bottom:20px;text-align:center">确认信息并提交</h3>
+        <div id="confirmInfo" style="background:#f8fafc;padding:20px;border-radius:10px;margin-bottom:20px"></div>
+        <div style="background:#fffbeb;padding:16px;border-radius:10px;margin-bottom:20px">
+          <strong>温馨提示：</strong>本评估基于AI模型分析，结果仅供参考，不能替代专业医疗诊断。如有不适请及时就医。
+        </div>
+        <div style="text-align:center">
+          <button class="btn btn-outline" onclick="prevStep(3)">上一步</button>
+          <button class="btn btn-primary" onclick="submitAssessment()">开始评估</button>
+        </div>
+      </div>
+
+      <!-- 评估结果 -->
+      <div id="result" class="risk-result">
+        <div class="gauge-container" style="margin-bottom:24px">
+          <div class="gauge-bg" id="gaugeBg"></div>
+          <div class="gauge-inner">
+            <div style="font-size:36px;font-weight:700;color:var(--primary)" id="riskScore">0</div>
+            <div style="font-size:13px;color:var(--text-light)">风险分</div>
           </div>
         </div>
-
-        <div class="card" style="background:#f8fafc;margin-bottom:20px">
-          <h4 style="margin-bottom:12px">📋 AI评估报告</h4>
-          <div id="resultAdvice" style="line-height:1.8;font-size:14px"></div>
+        <div style="text-align:center;margin-bottom:24px">
+          <span class="tag" id="riskLevel" style="font-size:16px;padding:8px 20px">低风险</span>
         </div>
-
-        <div class="grid grid-3" style="margin-bottom:20px">
-          <div style="text-align:center;padding:16px;background:#f0f9ff;border-radius:10px">
-            <div style="font-size:24px;margin-bottom:6px">🥗</div>
-            <h4 style="font-size:14px;margin-bottom:4px">饮食建议</h4>
-            <p style="font-size:12px;color:var(--text-light)" id="dietAdvice">--</p>
+        <div id="resultDetail" style="margin-bottom:24px"></div>
+        <div class="grid grid-3" style="margin-bottom:24px">
+          <div class="card" style="text-align:center">
+            <div style="font-size:24px;margin-bottom:8px">🥗</div>
+            <h4 style="margin-bottom:8px">饮食建议</h4>
+            <p style="font-size:13px;color:var(--text-light)" id="dietAdvice"></p>
           </div>
-          <div style="text-align:center;padding:16px;background:#f0fdf4;border-radius:10px">
-            <div style="font-size:24px;margin-bottom:6px">🏃</div>
-            <h4 style="font-size:14px;margin-bottom:4px">运动建议</h4>
-            <p style="font-size:12px;color:var(--text-light)" id="exerciseAdvice">--</p>
+          <div class="card" style="text-align:center">
+            <div style="font-size:24px;margin-bottom:8px">🏃</div>
+            <h4 style="margin-bottom:8px">运动建议</h4>
+            <p style="font-size:13px;color:var(--text-light)" id="exerciseAdvice"></p>
           </div>
-          <div style="text-align:center;padding:16px;background:#fffbeb;border-radius:10px">
-            <div style="font-size:24px;margin-bottom:6px">🩺</div>
-            <h4 style="font-size:14px;margin-bottom:4px">就医建议</h4>
-            <p style="font-size:12px;color:var(--text-light)" id="medicalAdvice">--</p>
+          <div class="card" style="text-align:center">
+            <div style="font-size:24px;margin-bottom:8px">🏥</div>
+            <h4 style="margin-bottom:8px">就医建议</h4>
+            <p style="font-size:13px;color:var(--text-light)" id="medicalAdvice"></p>
           </div>
         </div>
-
-        <div style="text-align:center;display:flex;gap:12px;justify-content:center">
-          <button class="btn btn-primary" onclick="window.location.href='plan.html'">获取个性化方案</button>
-          <button class="btn btn-secondary" onclick="window.location.href='doctor.html'">在线咨询医师</button>
-          <button class="btn btn-outline" onclick="resetForm()">重新评估</button>
+        <div style="text-align:center">
+          <button class="btn btn-outline" onclick="resetAssessment()">重新评估</button>
+          <button class="btn btn-primary" onclick="window.location.href='ai.html'">咨询AI助手</button>
         </div>
       </div>
     </div>
@@ -195,70 +185,67 @@
 
   <script src="js/common.js"></script>
   <script>
-    Utils.initPage('');
+    Utils.initPage('risk.html');
     
     let currentStep = 1;
     let formData = {};
 
     function nextStep(step) {
-      // 验证当前步骤
       if (step === 1) {
         const age = document.getElementById('age').value;
         const gender = document.getElementById('gender').value;
         const height = document.getElementById('height').value;
         const weight = document.getElementById('weight').value;
-        if (!age || !gender || !height || !weight) {
-          Utils.toast('请填写所有必填项', 'warning');
+        const familyHistory = document.getElementById('familyHistory').value;
+        
+        if (!age || !gender || !height || !weight || !familyHistory) {
+          Utils.toast('请填写所有基本信息', 'warning');
           return;
         }
       }
       
-      document.getElementById('page' + step).style.display = 'none';
-      document.getElementById('page' + (step + 1)).style.display = 'block';
-      
-      document.getElementById('step' + step).classList.remove('active');
-      document.getElementById('step' + step).classList.add('done');
-      document.getElementById('step' + (step + 1)).classList.add('active');
+      document.getElementById('step' + step).style.display = 'none';
+      document.getElementById('step' + (step + 1)).style.display = 'block';
+      document.getElementById('dot' + step).classList.remove('active');
+      document.getElementById('dot' + step).classList.add('done');
       document.getElementById('line' + step).classList.add('done');
-      
+      document.getElementById('dot' + (step + 1)).classList.add('active');
       currentStep = step + 1;
       
       if (step === 2) {
-        showConfirm();
+        showConfirmInfo();
       }
     }
 
     function prevStep(step) {
-      document.getElementById('page' + step).style.display = 'none';
-      document.getElementById('page' + (step - 1)).style.display = 'block';
-      
-      document.getElementById('step' + step).classList.remove('active');
-      document.getElementById('step' + (step - 1)).classList.remove('done');
-      document.getElementById('step' + (step - 1)).classList.add('active');
+      document.getElementById('step' + step).style.display = 'none';
+      document.getElementById('step' + (step - 1)).style.display = 'block';
+      document.getElementById('dot' + step).classList.remove('active');
+      document.getElementById('dot' + (step - 1)).classList.remove('done');
+      document.getElementById('dot' + (step - 1)).classList.add('active');
       document.getElementById('line' + (step - 1)).classList.remove('done');
-      
       currentStep = step - 1;
     }
 
-    function showConfirm() {
+    function showConfirmInfo() {
       formData = {
         age: document.getElementById('age').value,
         gender: document.getElementById('gender').value === 'male' ? '男' : '女',
         height: document.getElementById('height').value,
         weight: document.getElementById('weight').value,
         familyHistory: document.getElementById('familyHistory').value === 'yes' ? '有' : '无',
-        bloodPressure: document.getElementById('bloodPressure').options[document.getElementById('bloodPressure').selectedIndex].text,
-        exercise: document.getElementById('exercise').options[document.getElementById('exercise').selectedIndex].text,
-        diet: document.getElementById('diet').options[document.getElementById('diet').selectedIndex].text,
-        smoking: document.getElementById('smoking').options[document.getElementById('smoking').selectedIndex].text,
-        drinking: document.getElementById('drinking').options[document.getElementById('drinking').selectedIndex].text
+        bloodPressure: document.getElementById('bloodPressure').value,
+        exercise: document.getElementById('exercise').value,
+        diet: document.getElementById('diet').value,
+        smoking: document.getElementById('smoking').value,
+        drinking: document.getElementById('drinking').value
       };
       
       const bmi = Utils.calcBMI(formData.height, formData.weight);
-      const bmiCat = Utils.bmiCategory(bmi);
+      const bmiCat = Utils.getBMICategory(bmi);
       
       document.getElementById('confirmInfo').innerHTML = `
-        <div class="grid grid-2" style="gap:12px;font-size:14px">
+        <div class="grid grid-2" style="gap:12px">
           <div><strong>年龄：</strong>${formData.age} 岁</div>
           <div><strong>性别：</strong>${formData.gender}</div>
           <div><strong>身高：</strong>${formData.height} cm</div>
@@ -275,108 +262,103 @@
     }
 
     async function submitAssessment() {
-      const btn = document.getElementById('submitBtn');
-      const text = document.getElementById('submitText');
+      const btn = event.target;
       btn.disabled = true;
-      text.innerHTML = '<span class="loading"></span> AI分析中...';
+      btn.innerHTML = '<span class="loading"></span> AI分析中...';
       
-      // 构建评估数据
-      const profile = {
-        age: parseInt(formData.age),
-        gender: formData.gender,
-        height: formData.height,
-        weight: formData.weight,
-        bmi: parseFloat(Utils.calcBMI(formData.height, formData.weight)),
-        familyHistory: document.getElementById('familyHistory').value,
-        bloodPressure: document.getElementById('bloodPressure').value,
-        exercise: document.getElementById('exercise').value,
-        diet: document.getElementById('diet').value,
-        smoking: document.getElementById('smoking')?.value || '不吸烟',
-        drinking: document.getElementById('drinking')?.value || '不饮酒'
-      };
-      
-      // 基础评分（用于仪表盘展示）
-      const result = MockData.predictRisk(profile);
-      
-      // 调用AI生成详细评估报告
       try {
-        const aiResult = await DifyAPI.runWorkflow({
-          type: 'risk_prediction',
-          ...profile
-        });
-        if (aiResult && aiResult.result) {
-          result.aiReport = aiResult.result;
-        }
-      } catch (e) {
-        console.error('AI report generation failed:', e);
+        const profile = {
+          age: parseInt(formData.age),
+          gender: formData.gender,
+          bmi: parseFloat(Utils.calcBMI(formData.height, formData.weight)),
+          familyHistory: formData.familyHistory === '有',
+          bloodPressure: formData.bloodPressure,
+          exercise: formData.exercise,
+          diet: formData.diet,
+          smoking: formData.smoking === '吸烟',
+          drinking: formData.drinking
+        };
+        
+        // 基础评分
+        let score = 0;
+        if (profile.age >= 45) score += 15;
+        else if (profile.age >= 35) score += 8;
+        if (profile.bmi >= 28) score += 20;
+        else if (profile.bmi >= 24) score += 12;
+        if (profile.familyHistory) score += 15;
+        if (profile.bloodPressure === 'high') score += 15;
+        else if (profile.bloodPressure === 'borderline') score += 8;
+        if (profile.exercise === 'rarely') score += 10;
+        else if (profile.exercise === 'sometimes') score += 5;
+        if (profile.diet === 'unhealthy') score += 10;
+        else if (profile.diet === 'normal') score += 5;
+        if (profile.smoking) score += 5;
+        if (profile.drinking === 'heavy') score += 7;
+        
+        score = Math.min(100, score);
+        
+        // 风险等级
+        let level, color, advice;
+        if (score < 30) { level = '低风险'; color = '#10b981'; advice = '您的糖尿病风险较低，请继续保持健康的生活方式。'; }
+        else if (score < 60) { level = '中风险'; color = '#f59e0b'; advice = '您有一定的糖尿病风险，建议改善生活方式，定期监测血糖。'; }
+        else { level = '高风险'; color = '#ef4444'; advice = '您的糖尿病风险较高，建议尽快就医进行专业检查。'; }
+        
+        // 显示结果
+        document.getElementById('step3').style.display = 'none';
+        document.querySelector('.step-indicator').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+        
+        // 动画显示分数
+        let current = 0;
+        const timer = setInterval(() => {
+          current += 2;
+          if (current >= score) { current = score; clearInterval(timer); }
+          document.getElementById('riskScore').textContent = current;
+        }, 30);
+        
+        document.getElementById('riskLevel').textContent = level;
+        document.getElementById('riskLevel').style.background = color;
+        document.getElementById('riskLevel').style.color = 'white';
+        
+        // 风险因素分析
+        let factors = '';
+        if (profile.age >= 45) factors += `<li>年龄偏大（${profile.age}岁），糖尿病风险随年龄增长而增加</li>`;
+        if (profile.bmi >= 24) factors += `<li>BMI偏高（${profile.bmi}），超重或肥胖是糖尿病的重要危险因素</li>`;
+        if (profile.familyHistory) factors += `<li>有糖尿病家族史，遗传因素增加患病风险</li>`;
+        if (profile.bloodPressure !== 'normal') factors += `<li>血压异常，高血压与糖尿病常伴随发生</li>`;
+        if (profile.exercise === 'rarely') factors += `<li>运动不足，缺乏运动降低胰岛素敏感性</li>`;
+        if (profile.diet === 'unhealthy') factors += `<li>高糖高脂饮食，增加胰岛负担</li>`;
+        if (profile.smoking) factors += `<li>吸烟，吸烟会损伤血管和胰岛功能</li>`;
+        
+        document.getElementById('resultDetail').innerHTML = `
+          <p style="margin-bottom:10px"><strong>评估结论：</strong>${advice}</p>
+          <p style="margin-bottom:10px"><strong>风险因素分析：</strong></p>
+          <ul style="padding-left:20px;line-height:1.8">${factors || '<li>未发现明显风险因素</li>'}</ul>
+          <p style="margin-top:16px"><strong>建议：</strong>请结合下方个性化建议进行健康管理，并定期监测血糖。</p>
+        `;
+        
+        // 建议
+        document.getElementById('dietAdvice').textContent = color === '#10b981' ? '保持均衡饮食，控制总热量摄入' : '严格控制糖分摄入，增加膳食纤维，选择低GI食物';
+        document.getElementById('exerciseAdvice').textContent = color === '#10b981' ? '保持规律运动习惯' : '每周至少150分钟中等强度有氧运动，如快走、游泳';
+        document.getElementById('medicalAdvice').textContent = color === '#ef4444' ? '建议尽快就医，进行OGTT等专业检查' : '每年定期体检，监测空腹血糖和糖化血红蛋白';
+        
+      } catch (error) {
+        Utils.toast('评估失败，请重试', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '开始评估';
       }
-      
-      // 保存记录
-      const records = Storage.get('riskRecords') || [];
-      records.unshift({ ...result, profile, formData, date: new Date().toISOString() });
-      Storage.set('riskRecords', records);
-      
-      // 显示结果
-      showResult(result);
-      
-      btn.disabled = false;
-      text.textContent = '开始AI评估';
     }
 
-    function showResult(result) {
-      document.getElementById('formArea').style.display = 'none';
-      document.querySelector('.step-indicator').style.display = 'none';
-      document.getElementById('resultArea').style.display = 'block';
-      
-      // 动画显示分数
-      let score = 0;
-      const target = result.score;
-      const timer = setInterval(() => {
-        score += 2;
-        if (score >= target) { score = target; clearInterval(timer); }
-        document.getElementById('resultScore').textContent = score;
-      }, 30);
-      
-      const levelEl = document.getElementById('resultLevel');
-      levelEl.textContent = result.level;
-      levelEl.className = 'tag tag-' + result.color;
-      
-      // 仪表盘颜色
-      const gaugeColors = { green: '#10b981', orange: '#f59e0b', red: '#ef4444' };
-      document.getElementById('gaugeBg').style.background = `conic-gradient(${gaugeColors[result.color]} 0deg ${result.score * 3.6}deg, #e2e8f0 ${result.score * 3.6}deg 360deg)`;
-      
-      // 建议内容
-      document.getElementById('resultAdvice').innerHTML = `
-        <p style="margin-bottom:10px"><strong>评估结论：</strong>${result.advice}</p>
-        <p style="margin-bottom:10px"><strong>风险因素分析：</strong></p>
-        <ul style="padding-left:20px;margin-bottom:10px">
-          ${formData.age >= 45 ? '<li>年龄偏大（' + formData.age + '岁），糖尿病风险随年龄增长而增加</li>' : ''}
-          ${parseFloat(Utils.calcBMI(formData.height, formData.weight)) >= 24 ? '<li>BMI偏高（' + Utils.calcBMI(formData.height, formData.weight) + '），超重/肥胖是糖尿病重要危险因素</li>' : ''}
-          ${formData.familyHistory === '有' ? '<li>有糖尿病家族史，遗传因素增加患病风险</li>' : ''}
-          ${formData.bloodPressure !== '正常（收缩压<120且舒张压<80）' ? '<li>血压异常，高血压与糖尿病常伴随发生</li>' : ''}
-          ${formData.exercise.includes('很少') ? '<li>运动不足，缺乏运动降低胰岛素敏感性</li>' : ''}
-          ${formData.diet.includes('高糖') ? '<li>高糖高脂饮食，增加胰岛负担</li>' : ''}
-        </ul>
-        <p><strong>建议：</strong>请结合下方个性化建议进行健康管理，并定期监测血糖。</p>
-      `;
-      
-      // 分项建议
-      document.getElementById('dietAdvice').textContent = result.color === 'green' ? '保持均衡饮食，控制总热量' : '严格控制碳水摄入，选择低GI食物，增加膳食纤维';
-      document.getElementById('exerciseAdvice').textContent = result.color === 'green' ? '保持规律运动习惯' : '每周至少150分钟中等强度有氧运动，配合力量训练';
-      document.getElementById('medicalAdvice').textContent = result.color === 'red' ? '建议尽快就医，进行OGTT等专业检查' : '每年体检时检测空腹血糖和糖化血红蛋白';
-    }
-
-    function resetForm() {
-      document.getElementById('resultArea').style.display = 'none';
-      document.getElementById('formArea').style.display = 'block';
+    function resetAssessment() {
+      document.getElementById('result').style.display = 'none';
       document.querySelector('.step-indicator').style.display = 'flex';
-      document.getElementById('page1').style.display = 'block';
-      document.getElementById('page2').style.display = 'none';
-      document.getElementById('page3').style.display = 'none';
-      document.querySelectorAll('.step-dot').forEach((d, i) => {
-        d.className = 'step-dot' + (i === 0 ? ' active' : '');
-      });
-      document.querySelectorAll('.step-line').forEach(l => l.classList.remove('done'));
+      document.getElementById('step1').style.display = 'block';
+      document.getElementById('dot1').classList.add('active');
+      document.getElementById('dot1').classList.remove('done');
+      document.getElementById('dot2').classList.remove('active', 'done');
+      document.getElementById('dot3').classList.remove('active', 'done');
+      document.getElementById('line1').classList.remove('done');
+      document.getElementById('line2').classList.remove('done');
       currentStep = 1;
     }
   </script>
