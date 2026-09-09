@@ -495,15 +495,172 @@ img { max-width: 100%; }
   font-size: 13px;
 }
 
-/* 响应式 */
+/* 响应式 - 平板 */
+@media (max-width: 1024px) {
+  .container { max-width: 100%; padding: 20px; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 响应式 - 手机 */
 @media (max-width: 768px) {
+  /* 导航栏 */
+  .navbar { padding: 0 16px; height: 56px; }
+  .navbar .logo { font-size: 16px; gap: 8px; }
+  .navbar .logo-icon { width: 32px; height: 32px; font-size: 18px; }
   .nav-links { display: none; }
-  .grid-3, .grid-4 { grid-template-columns: 1fr; }
-  .grid-2 { grid-template-columns: 1fr; }
-  .form-row { grid-template-columns: 1fr; }
-  .carousel { height: 240px; }
-  .carousel-slide h2 { font-size: 22px; }
-  .container { padding: 16px; }
+  .nav-user .nav-username { display: none; }
+  .nav-avatar { width: 32px; height: 32px; font-size: 12px; }
+  
+  /* 移动端导航菜单 */
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.15);
+    border: none; border-radius: 8px;
+    color: white; font-size: 20px;
+    cursor: pointer;
+  }
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    top: 56px; left: 0; right: 0;
+    background: white;
+    box-shadow: var(--shadow-lg);
+    z-index: 99;
+    padding: 12px 0;
+  }
+  .mobile-nav.active { display: block; }
+  .mobile-nav a {
+    display: block;
+    padding: 12px 20px;
+    font-size: 15px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-nav a:last-child { border-bottom: none; }
+  .mobile-nav a.active { color: var(--primary); background: #eff6ff; }
+  
+  /* 容器 */
+  .container { padding: 12px; }
+  
+  /* 卡片 */
+  .card { padding: 16px; margin-bottom: 12px; }
+  .card-title { font-size: 16px; margin-bottom: 12px; }
+  .card-title .icon { font-size: 18px; }
+  
+  /* 网格布局 */
+  .grid { gap: 12px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  
+  /* 表单 */
+  .form-row { grid-template-columns: 1fr; gap: 12px; }
+  .form-group { margin-bottom: 14px; }
+  .form-input, .form-select, .form-textarea { padding: 10px 12px; font-size: 15px; }
+  
+  /* 按钮 */
+  .btn { padding: 10px 16px; font-size: 14px; }
+  .btn-lg { padding: 12px 20px; font-size: 15px; }
+  .btn-block-mobile { width: 100%; }
+  
+  /* 统计卡片 */
+  .stat-card { padding: 14px; gap: 12px; }
+  .stat-icon { width: 44px; height: 44px; font-size: 22px; border-radius: 10px; }
+  .stat-number { font-size: 20px; }
+  .stat-label { font-size: 12px; }
+  
+  /* 表格 - 横向滚动 */
+  .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .data-table { font-size: 13px; min-width: 600px; }
+  .data-table th, .data-table td { padding: 10px 12px; }
+  
+  /* 轮播图 */
+  .carousel { height: 200px; }
+  .carousel-slide h2 { font-size: 20px; }
+  .carousel-slide p { font-size: 13px; }
+  
+  /* 功能卡片 */
+  .feature-card { padding: 16px; }
+  .feature-icon { width: 48px; height: 48px; font-size: 24px; }
+  .feature-title { font-size: 15px; }
+  .feature-desc { font-size: 12px; }
+  
+  /* 聊天界面 */
+  .chat-container { height: calc(100vh - 200px); }
+  .message-bubble { max-width: 85%; font-size: 14px; padding: 10px 14px; }
+  .message-avatar { width: 32px; height: 32px; font-size: 16px; }
+  .chat-input-area { padding: 12px; gap: 8px; }
+  .chat-input { padding: 10px 14px; font-size: 14px; }
+  
+  /* 模态框 */
+  .modal-overlay { padding: 16px; }
+  .modal-content { width: 100%; max-width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal-header { padding: 16px; }
+  .modal-body { padding: 16px; }
+  .modal-footer { padding: 12px 16px; }
+  
+  /* 分页 */
+  .pagination { gap: 4px; flex-wrap: wrap; justify-content: center; }
+  .pagination button { min-width: 36px; height: 36px; font-size: 13px; }
+  
+  /* 标签页 */
+  .tabs { gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  .tab-btn { padding: 8px 14px; font-size: 13px; white-space: nowrap; }
+  
+  /* 进度条 */
+  .progress-bar { height: 6px; }
+  
+  /* 页脚 */
+  .footer { padding: 24px 16px; font-size: 12px; }
+  
+  /* 提示框 */
+  .alert { padding: 10px 14px; font-size: 13px; }
+  
+  /* 文章卡片 */
+  .article-card { padding: 14px; }
+  .article-title { font-size: 15px; }
+  .article-meta { font-size: 11px; flex-direction: column; gap: 4px; }
+  
+  /* 健康数据卡片 */
+  .health-data-card { padding: 14px; }
+  .health-data-value { font-size: 22px; }
+  .health-data-label { font-size: 12px; }
+  
+  /* 用药卡片 */
+  .medication-card { padding: 14px; }
+  .medication-name { font-size: 15px; }
+  
+  /* 报告卡片 */
+  .report-card { padding: 16px; }
+  .report-score { font-size: 32px; }
+  
+  /* 隐藏移动端不需要的元素 */
+  .hide-mobile { display: none !important; }
+  
+  /* 移动端全宽 */
+  .full-width-mobile { width: 100%; }
+}
+
+/* 响应式 - 小屏手机 */
+@media (max-width: 480px) {
+  .navbar .logo { font-size: 14px; }
+  .navbar .logo-text { display: none; }
+  .card { padding: 12px; }
+  .card-title { font-size: 15px; }
+  .btn { padding: 8px 14px; font-size: 13px; }
+  .stat-number { font-size: 18px; }
+  .message-bubble { max-width: 90%; font-size: 13px; }
+  .chat-input { font-size: 13px; }
+}
+
+/* 移动端安全区域适配 */
+@supports (padding: max(0px)) {
+  @media (max-width: 768px) {
+    .container { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+    .navbar { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  }
 }
 
 /* 加载动画 */

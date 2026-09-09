@@ -86,28 +86,28 @@
       <div class="stat-card">
         <div class="stat-icon blue">📈</div>
         <div class="stat-info">
-          <h3 id="statUsers">12,580</h3>
+          <h3 id="statUsers">0</h3>
           <p>累计服务用户</p>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon green">✅</div>
         <div class="stat-info">
-          <h3 id="statAssess">8,932</h3>
+          <h3 id="statAssess">0</h3>
           <p>风险评估次数</p>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon orange">📋</div>
         <div class="stat-info">
-          <h3 id="statPlans">6,745</h3>
+          <h3 id="statPlans">0</h3>
           <p>生成健康方案</p>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon red">💬</div>
         <div class="stat-info">
-          <h3 id="statConsult">15,230</h3>
+          <h3 id="statConsult">0</h3>
           <p>咨询对话次数</p>
         </div>
       </div>
@@ -181,6 +181,34 @@
 
   <script src="js/common.js"></script>
   <script>
+    // 后端API地址（公网地址，本地和公网都能访问）
+    const API_BASE = 'http://32331c2b.r9.cpolar.top/api';
+    
+    // 加载首页统计数据（真实API数据）
+    async function loadHomeStats() {
+      try {
+        const response = await fetch(`${API_BASE}/stats/overview`);
+        const result = await response.json();
+        
+        if (result.code === 0 && result.data) {
+          const data = result.data;
+          // 累计服务用户
+          document.getElementById('statUsers').textContent = data.total_users || 0;
+          // 风险评估次数
+          document.getElementById('statAssess').textContent = data.total_assessments || 0;
+          // 生成健康方案（用健康记录数近似）
+          document.getElementById('statPlans').textContent = data.total_records || 0;
+          // 咨询对话次数（用7天活跃用户数近似，实际项目可添加对话统计表）
+          document.getElementById('statConsult').textContent = data.active_users_7d || 0;
+        }
+      } catch (error) {
+        console.error('Load home stats error:', error);
+      }
+    }
+    
+    // 页面加载完成后加载统计数据
+    document.addEventListener('DOMContentLoaded', loadHomeStats);
+    
     // 初始化页面
     Utils.initPage('index.html');
 

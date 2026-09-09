@@ -383,20 +383,49 @@ const Utils = {
     nav.innerHTML = `
       <div class="logo">
         <div class="logo-icon">🩺</div>
-        <span>${CONFIG.APP_NAME}</span>
+        <span class="logo-text">${CONFIG.APP_NAME}</span>
       </div>
       <div class="nav-links">
         ${links.map(l => `<a href="${l.href}" class="${activePage === l.href ? 'active' : ''}">${l.icon} ${l.label}</a>`).join('')}
       </div>
+      <button class="mobile-menu-btn" onclick="Utils.toggleMobileMenu()" style="display:none">☰</button>
       <div class="nav-user" onclick="window.location.href='profile.html'">
         ${user ? `
           <div class="nav-avatar">${user.username ? user.username.charAt(0).toUpperCase() : 'U'}</div>
-          <span style="font-size:14px">${user.username || '用户'}</span>
+          <span class="nav-username" style="font-size:14px">${user.username || '用户'}</span>
         ` : `
           <a href="login.html" class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white">登录/注册</a>
         `}
       </div>
     `;
+    
+    // 添加移动端导航菜单
+    let mobileNav = document.querySelector('.mobile-nav');
+    if (!mobileNav) {
+      mobileNav = document.createElement('div');
+      mobileNav.className = 'mobile-nav';
+      document.body.appendChild(mobileNav);
+    }
+    mobileNav.innerHTML = links.map(l => 
+      `<a href="${l.href}" class="${activePage === l.href ? 'active' : ''}" onclick="Utils.toggleMobileMenu()">${l.icon} ${l.label}</a>`
+    ).join('') + (user ? 
+      `<a href="profile.html" onclick="Utils.toggleMobileMenu()">👤 个人中心</a><a href="#" onclick="Utils.logout();return false;">🚪 退出登录</a>` : 
+      `<a href="login.html">🔑 登录/注册</a>`
+    );
+  },
+  
+  // 切换移动端菜单
+  toggleMobileMenu() {
+    const mobileNav = document.querySelector('.mobile-nav');
+    if (mobileNav) {
+      mobileNav.classList.toggle('active');
+    }
+  },
+  
+  // 退出登录
+  logout() {
+    Storage.clearCurrentUser();
+    window.location.href = 'login.html';
   },
 
   // 渲染页脚

@@ -13,13 +13,35 @@
     }
     .admin-menu-item:hover { background: rgba(255,255,255,0.1); }
     .admin-menu-item.active { background: var(--primary); }
+    
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+      .admin-layout { grid-template-columns: 1fr !important; }
+      .admin-sidebar {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 10px;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .admin-sidebar h3 { display: none; }
+      .admin-menu-item {
+        white-space: nowrap;
+        padding: 8px 12px;
+        margin-bottom: 0;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+      .admin-menu-item span { display: none; }
+    }
   </style>
 </head>
 <body>
   <nav class="navbar"></nav>
 
   <div class="container">
-    <div class="grid" style="grid-template-columns: 220px 1fr; gap:20px">
+    <div class="grid admin-layout" style="grid-template-columns: 220px 1fr; gap:20px">
       <!-- 侧边栏 -->
       <div class="admin-sidebar">
         <h3 style="padding:8px 16px;font-size:16px;margin-bottom:12px">⚙️ 管理后台</h3>
@@ -37,63 +59,32 @@
           <div class="grid grid-4" style="margin-bottom:20px">
             <div class="stat-card">
               <div class="stat-icon blue">👥</div>
-              <div class="stat-info"><h3>1,256</h3><p>注册用户</p></div>
+              <div class="stat-info"><h3 id="statTotalUsers">0</h3><p>注册用户</p></div>
             </div>
             <div class="stat-card">
               <div class="stat-icon green">📊</div>
-              <div class="stat-info"><h3>3,892</h3><p>风险评估</p></div>
+              <div class="stat-info"><h3 id="statTotalAssessments">0</h3><p>风险评估</p></div>
             </div>
             <div class="stat-card">
               <div class="stat-icon orange">💬</div>
-              <div class="stat-info"><h3>15,678</h3><p>AI对话</p></div>
+              <div class="stat-info"><h3 id="statTotalRecords">0</h3><p>健康记录</p></div>
             </div>
             <div class="stat-card">
               <div class="stat-icon red">✅</div>
-              <div class="stat-info"><h3>8,456</h3><p>打卡次数</p></div>
+              <div class="stat-info"><h3 id="statActiveUsers">0</h3><p>活跃用户(7天)</p></div>
             </div>
           </div>
           
           <div class="grid grid-2" style="gap:20px">
             <div class="card">
-              <div class="card-title"><span class="icon">📈</span>用户增长趋势</div>
-              <div style="height:200px;display:flex;align-items:flex-end;gap:8px;padding:20px 0">
-                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:40%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">120</span></div>
-                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:55%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">180</span></div>
-                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:45%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">150</span></div>
-                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:70%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">230</span></div>
-                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:65%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">210</span></div>
-                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:85%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">280</span></div>
-                <div style="flex:1;background:linear-gradient(to top, var(--primary), var(--primary-light));height:100%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px">320</span></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);padding:0 4px">
-                <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span>
-              </div>
+              <div class="card-title"><span class="icon">📈</span>用户增长趋势（近7天）</div>
+              <div id="userGrowthChart" style="height:200px;display:flex;align-items:flex-end;gap:8px;padding:20px 0"></div>
+              <div id="userGrowthLabels" style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);padding:0 4px"></div>
             </div>
             
             <div class="card">
               <div class="card-title"><span class="icon">🎯</span>功能使用分布</div>
-              <div style="padding:10px 0">
-                <div style="margin-bottom:14px">
-                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>风险评估</span><span>32%</span></div>
-                  <div class="progress-bar"><div class="progress-fill" style="width:32%;background:var(--primary)"></div></div>
-                </div>
-                <div style="margin-bottom:14px">
-                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>AI对话</span><span>28%</span></div>
-                  <div class="progress-bar"><div class="progress-fill" style="width:28%;background:var(--secondary)"></div></div>
-                </div>
-                <div style="margin-bottom:14px">
-                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>生活方案</span><span>18%</span></div>
-                  <div class="progress-bar"><div class="progress-fill" style="width:18%;background:var(--accent)"></div></div>
-                </div>
-                <div style="margin-bottom:14px">
-                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>健康打卡</span><span>14%</span></div>
-                  <div class="progress-bar"><div class="progress-fill" style="width:14%;background:#8b5cf6"></div></div>
-                </div>
-                <div>
-                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>医师咨询</span><span>8%</span></div>
-                  <div class="progress-bar"><div class="progress-fill" style="width:8%;background:var(--danger)"></div></div>
-                </div>
-              </div>
+              <div id="featureUsageChart" style="padding:10px 0"></div>
             </div>
           </div>
         </div>
@@ -304,6 +295,100 @@
   <script>
     Utils.initPage('admin.html');
     
+    // ==================== 权限控制 ====================
+    (function checkAdminAuth() {
+      const currentUser = Storage.getCurrentUser();
+      if (!currentUser) {
+        Utils.toast('请先登录', 'warning');
+        setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+        return;
+      }
+      if (currentUser.role !== 'admin') {
+        Utils.toast('您没有管理员权限', 'error');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+        return;
+      }
+      console.log('管理员验证通过:', currentUser.username);
+    })();
+    
+    // ==================== 加载统计概览（真实API数据）====================
+    const API_BASE = 'http://32331c2b.r9.cpolar.top/api';
+    
+    async function loadStats() {
+      try {
+        const response = await fetch(`${API_BASE}/stats/overview`);
+        const result = await response.json();
+        
+        if (result.code === 0 && result.data) {
+          const data = result.data;
+          document.getElementById('statTotalUsers').textContent = data.total_users || 0;
+          document.getElementById('statTotalAssessments').textContent = data.total_assessments || 0;
+          document.getElementById('statTotalRecords').textContent = data.total_records || 0;
+          document.getElementById('statActiveUsers').textContent = data.active_users_7d || 0;
+        }
+      } catch (error) {
+        console.error('Load stats error:', error);
+      }
+    }
+    
+    // 加载用户增长趋势图
+    async function loadUserGrowthChart() {
+      try {
+        const response = await fetch(`${API_BASE}/stats/user-growth`);
+        const result = await response.json();
+        
+        if (result.code === 0 && result.data) {
+          const data = result.data;
+          const maxCount = Math.max(...data.map(d => d.count), 1);
+          const colors = ['var(--primary)', 'var(--secondary)', 'var(--accent)', '#8b5cf6', 'var(--danger)', '#10b981', '#f59e0b'];
+          
+          const chartHtml = data.map((d, i) => {
+            const heightPercent = Math.max((d.count / maxCount) * 100, 5);
+            return `<div style="flex:1;background:linear-gradient(to top, ${colors[i % colors.length]}, var(--primary-light));height:${heightPercent}%;border-radius:4px 4px 0 0;position:relative"><span style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:600">${d.count}</span></div>`;
+          }).join('');
+          
+          document.getElementById('userGrowthChart').innerHTML = chartHtml;
+          document.getElementById('userGrowthLabels').innerHTML = data.map(d => `<span>${d.date}</span>`).join('');
+        }
+      } catch (error) {
+        console.error('Load user growth error:', error);
+      }
+    }
+    
+    // 加载功能使用分布图
+    async function loadFeatureUsageChart() {
+      try {
+        const response = await fetch(`${API_BASE}/stats/feature-usage`);
+        const result = await response.json();
+        
+        if (result.code === 0 && result.data) {
+          const features = result.data.features;
+          const colors = ['var(--primary)', 'var(--secondary)', 'var(--accent)', '#8b5cf6', 'var(--danger)'];
+          
+          const chartHtml = features.map((f, i) => `
+            <div style="margin-bottom:14px">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+                <span>${f.name}</span><span style="font-weight:600">${f.count}次 (${f.percent}%)</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(f.percent, 100)}%;background:${colors[i % colors.length]}"></div></div>
+            </div>
+          `).join('');
+          
+          document.getElementById('featureUsageChart').innerHTML = chartHtml;
+        }
+      } catch (error) {
+        console.error('Load feature usage error:', error);
+      }
+    }
+    
+    // 页面加载完成后加载统计数据和用户列表
+    document.addEventListener('DOMContentLoaded', function() {
+      loadStats();
+      loadUserGrowthChart();
+      loadFeatureUsageChart();
+      loadUsers(1);
+    });
+    
     // 切换管理标签
     function switchAdminTab(tab, element) {
       document.querySelectorAll('.admin-tab').forEach(t => t.style.display = 'none');
@@ -313,7 +398,6 @@
     }
     
     // ==================== 用户管理（SQLite数据库 + Flask API）====================
-    const API_BASE = 'http://localhost:5000/api';
     let currentPage = 1;
     let totalPages = 1;
 
@@ -560,6 +644,29 @@
     `).join('');
     
     // 管理助手对话
+    // Markdown渲染函数
+    function renderMarkdown(text) {
+      if (!text) return '';
+      let html = text;
+      html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
+        return `<pre style="background:#f5f5f5;padding:12px;border-radius:8px;overflow-x:auto;font-size:13px"><code>${code.trim()}</code></pre>`;
+      });
+      html = html.replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:13px">$1</code>');
+      html = html.replace(/^### (.*$)/gm, '<h3 style="font-size:16px;font-weight:600;margin:12px 0 8px">$1</h3>');
+      html = html.replace(/^## (.*$)/gm, '<h2 style="font-size:18px;font-weight:600;margin:14px 0 10px">$1</h2>');
+      html = html.replace(/^# (.*$)/gm, '<h1 style="font-size:20px;font-weight:700;margin:16px 0 12px">$1</h1>');
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      html = html.replace(/^[-•] (.*$)/gm, '<li style="margin:4px 0">$1</li>');
+      html = html.replace(/(<li[^>]*>[\s\S]*?<\/li>)/g, '<ul style="padding-left:20px;margin:8px 0">$1</ul>');
+      html = html.replace(/^\d+\. (.*$)/gm, '<li style="margin:4px 0">$1</li>');
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#3b82f6;text-decoration:underline" target="_blank">$1</a>');
+      html = html.replace(/\n/g, '<br>');
+      html = html.replace(/(<br>\s*){3,}/g, '<br><br>');
+      return html;
+    }
+    
     async function adminSend() {
       const input = document.getElementById('adminChatInput');
       const text = input.value.trim();
@@ -601,7 +708,7 @@
       chat.innerHTML += `
         <div class="message ai" style="max-width:100%">
           <div class="message-avatar">🤖</div>
-          <div class="message-bubble" style="white-space:pre-wrap">${reply}</div>
+          <div class="message-bubble">${renderMarkdown(reply)}</div>
         </div>
       `;
       chat.scrollTop = chat.scrollHeight;
