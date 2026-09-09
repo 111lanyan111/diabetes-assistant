@@ -42,7 +42,7 @@
 | **用药管理** | **medication.html** | **用药计划、提醒时间、服药打卡、依从性统计、用药记录、AI用药咨询** |
 | **健康报告** | **report.html** | **周/月健康报告、综合评分、血糖统计、用药依从性、AI分析建议、打印导出PDF** |
 
-## 扩展功能（80-89分）
+## 扩展功能
 
 ### 核心扩展模块
 - **📈 健康数据可视化统计**：5种图表（折线图、饼图、柱状图、雷达图），支持近7/14/30天数据切换，AI智能数据分析
@@ -101,6 +101,9 @@ diabetesAssistant/
 ├── backend/
 │   ├── app.py          # Flask后端API（8个接口）
 │   └── diabetes.db     # SQLite数据库
+├── scripts/            # 一键启动/关闭脚本
+│   ├── 启动所有服务.bat  # 一键启动Ollama+后端+前端
+│   └── 关闭所有服务.bat  # 一键关闭所有服务
 ├── tests/              # Playwright测试脚本
 │   ├── index.spec.js
 │   ├── login.spec.js
@@ -131,6 +134,16 @@ diabetesAssistant/
 - Ollama（本地AI模式需要）
 
 ### 本地模式（推荐，无需联网）
+
+#### 方式一：一键启动脚本（最简单）
+
+```bash
+# 双击运行 scripts/启动所有服务.bat
+# 自动启动 Ollama + 后端Flask + 前端HTTP服务器 + 打开浏览器
+# 关闭服务运行 scripts/关闭所有服务.bat
+```
+
+#### 方式二：手动启动
 
 #### 1. 安装Ollama并下载模型
 ```bash
