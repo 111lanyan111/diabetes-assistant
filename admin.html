@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>智能管理 - 糖尿病预治智能助手</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     .admin-sidebar { background: #1e293b; color: white; border-radius: 12px; padding: 16px; }
     .admin-menu-item {
@@ -312,7 +313,7 @@
     })();
     
     // ==================== 加载统计概览（真实API数据）====================
-    const API_BASE = 'http://4342b9a6.r9.cpolar.top/api';
+    const API_BASE = 'http://localhost:5000/api';
     
     async function loadStats() {
       try {
@@ -449,7 +450,7 @@
         }
       } catch (error) {
         console.error('Load users error:', error);
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#ef4444">加载失败，请确保后端服务已启动（http://localhost:5000）</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#ef4444">加载失败，请确保后端服务已启动（' + API_BASE + '）</td></tr>';
       }
     }
 
@@ -673,6 +674,8 @@
       if (!text) return;
       
       const chat = document.getElementById('adminChat');
+      
+      // 添加用户消息
       chat.innerHTML += `
         <div class="message user" style="max-width:100%">
           <div class="message-avatar">👤</div>
@@ -682,35 +685,355 @@
       input.value = '';
       chat.scrollTop = chat.scrollHeight;
       
-      // 显示正在输入
+      // 创建AI消息容器
+      const aiMsgId = 'aiMsg_' + Date.now();
       chat.innerHTML += `
-        <div class="message ai" style="max-width:100%" id="adminTyping">
+        <div class="message ai" style="max-width:100%" id="${aiMsgId}">
           <div class="message-avatar">🤖</div>
-          <div class="message-bubble"><span style="animation:bounce 1.4s infinite">●</span> <span style="animation:bounce 1.4s infinite 0.2s">●</span> <span style="animation:bounce 1.4s infinite 0.4s">●</span></div>
+          <div class="message-bubble" id="${aiMsgId}_content"><span style="animation:bounce 1.4s infinite">●</span> <span style="animation:bounce 1.4s infinite 0.2s">●</span> <span style="animation:bounce 1.4s infinite 0.4s">●</span></div>
         </div>
       `;
       chat.scrollTop = chat.scrollHeight;
       
-      // 调用AI生成管理助手回复
-      let reply;
+      // 获取真实的平台数据
+      let platformData = '';
+      let bloodSugarData = '';
+      
       try {
-        const adminPrompt = `你是糖尿病健康管理平台的AI运营助手。请根据管理员的问题，给出专业的运营分析和建议。当前平台数据：本周新增用户128人，风险评估完成342次，AI对话总量2156次。
-
-管理员问题：${text}`;
-        const result = await DifyAPI.chatMessage(adminPrompt);
-        reply = result.answer;
-      } catch (error) {
-        console.error('Admin AI error:', error);
-        reply = '根据系统数据分析：本周新增用户128人，环比增长15%；风险评估完成342次，其中高风险用户占比12%；AI对话总量2,156次，平均响应时间1.2秒。建议针对高风险用户推送个性化健康方案。';
+        const statsRes = await fetch(`${API_BASE}/stats/overview`);
+        const statsData = await statsRes.json();
+        const aiRes = await fetch(`${API_BASE}/ai/stats`);
+        const aiData = await aiRes.json();
+        platformData = `【平台概览】
+- 注册用户总数：${statsData.data.total_users}人
+- 健康记录总数：${statsData.data.total_records}条
+- 活跃用户(7天)：${statsData.data.active_users_7d}人
+- AI对话总数：${aiData.data.total_conversations}次
+- AI使用用户数：${aiData.data.total_users}人
+- 近7天AI对话：${aiData.data.recent_7d_conversations}次`;
+      } catch (e) {
+        platformData = '（平台数据获取失败）';
       }
       
-      document.getElementById('adminTyping')?.remove();
-      chat.innerHTML += `
-        <div class="message ai" style="max-width:100%">
-          <div class="message-avatar">🤖</div>
-          <div class="message-bubble">${renderMarkdown(reply)}</div>
-        </div>
-      `;
+      // 检测是否需要查询血糖数据，并判断时间范围和指定用户
+      const needBloodSugar = /血糖|blood|sugar|血糖数据|本周|近7天|近30天|近一个月|一个月|月度|趋势|统计|分析|用户\d+/i.test(text);
+      let days = 7;
+      if (/近30天|近一个月|一个月|月度|30天/.test(text)) {
+        days = 30;
+      } else if (/近14天|两周|14天/.test(text)) {
+        days = 14;
+      }
+      const periodText = days === 30 ? '近一个月' : days === 14 ? '近两周' : '近7天';
+      
+      // 从提问中提取用户ID（如"用户50"、"用户100"）
+      let specifiedUserId = null;
+      const userMatch = text.match(/用户\s*(\d+)/);
+      if (userMatch) {
+        specifiedUserId = parseInt(userMatch[1]);
+      }
+      
+      if (needBloodSugar) {
+        try {
+          // 查询有血糖记录的用户（ID 2-11为基础样本用户）
+          const userIds = [];
+          for (let uid = 2; uid <= 11; uid++) {
+            userIds.push(uid);
+          }
+          // 如果指定了用户，也加入查询列表
+          if (specifiedUserId && !userIds.includes(specifiedUserId)) {
+            userIds.push(specifiedUserId);
+          }
+          
+          let allFasting = [];
+          let allPostprandial = [];
+          let userStats = [];
+          let trendDates = [];
+          let trendFasting = [];
+          let trendPostprandial = [];
+          let specifiedUserStats = null;
+          
+          // 查询每个用户指定时间范围的血糖数据
+          for (const uid of userIds) {
+            try {
+              const bsRes = await fetch(`${API_BASE}/blood-sugar/range?user_id=${uid}&days=${days}`);
+              const bsData = await bsRes.json();
+              if (bsData.data && bsData.data.stats.record_count > 0) {
+                const s = bsData.data.stats;
+                const userStat = {
+                  userId: uid,
+                  count: s.record_count,
+                  fastingAvg: s.fasting_avg,
+                  fastingMax: s.fasting_max,
+                  fastingMin: s.fasting_min,
+                  postprandialAvg: s.postprandial_avg,
+                  postprandialMax: s.postprandial_max,
+                  postprandialMin: s.postprandial_min
+                };
+                userStats.push(userStat);
+                // 记录指定用户的统计数据
+                if (specifiedUserId && uid === specifiedUserId) {
+                  specifiedUserStats = userStat;
+                }
+                // 收集所有血糖值用于整体统计
+                bsData.data.records.forEach(r => {
+                  if (r.fasting_blood_sugar) allFasting.push(r.fasting_blood_sugar);
+                  if (r.postprandial_blood_sugar) allPostprandial.push(r.postprandial_blood_sugar);
+                });
+              }
+            } catch (e) { continue; }
+          }
+          
+          // 获取指定用户（或默认用户2）的趋势数据用于图表
+          const chartUserId = specifiedUserId || 2;
+          try {
+            const trendRes = await fetch(`${API_BASE}/blood-sugar/trend?user_id=${chartUserId}&days=${days}`);
+            const trendData = await trendRes.json();
+            if (trendData.data) {
+              trendDates = trendData.data.dates;
+              trendFasting = trendData.data.fasting;
+              trendPostprandial = trendData.data.postprandial;
+            }
+          } catch (e) {}
+          
+          // 获取所有有血糖数据的用户列表用于图表切换
+          const allUserIds = [];
+          try {
+            const usersRes = await fetch(`${API_BASE}/blood-sugar/users`);
+            const usersData = await usersRes.json();
+            if (usersData.data) {
+              usersData.data.forEach(u => allUserIds.push(u.user_id));
+            }
+          } catch (e) {
+            // 如果API失败，回退到默认用户列表
+            for (let uid = 2; uid <= 20; uid++) {
+              allUserIds.push(uid);
+            }
+          }
+          
+          // 计算整体统计
+          const overallFastingAvg = allFasting.length ? (allFasting.reduce((a,b) => a+b, 0) / allFasting.length).toFixed(1) : 0;
+          const overallPostprandialAvg = allPostprandial.length ? (allPostprandial.reduce((a,b) => a+b, 0) / allPostprandial.length).toFixed(1) : 0;
+          const highFastingCount = allFasting.filter(v => v > 7.0).length;
+          const highPostprandialCount = allPostprandial.filter(v => v > 11.1).length;
+          
+          // 构建指定用户的详细数据描述
+          let specifiedUserDetail = '';
+          if (specifiedUserId && specifiedUserStats) {
+            const s = specifiedUserStats;
+            const fastingStatus = s.fastingAvg > 7.0 ? '偏高' : (s.fastingAvg < 3.9 ? '偏低' : '正常');
+            const postprandialStatus = s.postprandialAvg > 11.1 ? '偏高' : (s.postprandialAvg < 7.8 ? '正常' : '偏高');
+            specifiedUserDetail = `
+【指定用户${specifiedUserId}的详细血糖数据】
+- 记录数：${s.count}条
+- 空腹血糖：平均${s.fastingAvg} mmol/L（最高${s.fastingMax}/最低${s.fastingMin}），状态：${fastingStatus}
+- 餐后血糖：平均${s.postprandialAvg} mmol/L（最高${s.postprandialMax}/最低${s.postprandialMin}），状态：${postprandialStatus}
+- 与整体对比：空腹${s.fastingAvg > overallFastingAvg ? '高于' : '低于'}整体平均(${overallFastingAvg})，餐后${s.postprandialAvg > overallPostprandialAvg ? '高于' : '低于'}整体平均(${overallPostprandialAvg})`;
+          } else if (specifiedUserId) {
+            specifiedUserDetail = `\n【指定用户${specifiedUserId}】该用户暂无血糖记录数据`;
+          }
+          
+          bloodSugarData = `
+【${periodText}血糖数据详情（${userStats.length}位活跃用户）】
+整体统计：
+- 空腹血糖平均值：${overallFastingAvg} mmol/L（正常范围3.9-6.1）
+- 餐后血糖平均值：${overallPostprandialAvg} mmol/L（正常范围<7.8）
+- 空腹血糖偏高(>7.0)记录数：${highFastingCount}条（占比${allFasting.length ? ((highFastingCount/allFasting.length)*100).toFixed(1) : 0}%）
+- 餐后血糖偏高(>11.1)记录数：${highPostprandialCount}条（占比${allPostprandial.length ? ((highPostprandialCount/allPostprandial.length)*100).toFixed(1) : 0}%）
+- 总血糖记录数：${allFasting.length + allPostprandial.length}条
+${specifiedUserDetail}
+
+各用户血糖情况：
+${userStats.map((s, i) => `${i+1}. 用户${s.userId}：空腹平均${s.fastingAvg}（最高${s.fastingMax}/最低${s.fastingMin}），餐后平均${s.postprandialAvg}（最高${s.postprandialMax}/最低${s.postprandialMin}），共${s.count}条记录`).join('\n')}`;
+          
+          // 保存趋势数据用于生成图表
+          window._bloodSugarTrend = { 
+            dates: trendDates, 
+            fasting: trendFasting, 
+            postprandial: trendPostprandial, 
+            period: periodText,
+            currentUserId: chartUserId,
+            days: days,
+            allUserIds: allUserIds
+          };
+        } catch (e) {
+          bloodSugarData = '\n（血糖数据获取失败）';
+          window._bloodSugarTrend = null;
+        }
+      }
+      
+      // 构建prompt
+      let focusInstruction = '';
+      if (specifiedUserId) {
+        focusInstruction = `\n\n【重要】管理员特别询问了用户${specifiedUserId}的血糖数据，请重点分析该用户的具体血糖数值、异常情况、与整体水平的对比，并给出针对性的健康建议。不要说该用户数据不存在或未公开，上面已提供该用户的详细数据。`;
+      }
+      
+      const adminPrompt = `你是糖尿病健康管理平台的AI运营助手。请根据管理员的问题，结合以下平台真实数据，给出专业、具体的分析和建议。回答请使用markdown格式，包含标题、列表、数据对比等。
+
+${platformData}
+${bloodSugarData}
+
+管理员问题：${text}
+${focusInstruction}
+
+请基于以上真实数据进行具体分析，不要泛泛而谈。如果涉及血糖数据，请指出具体数值、异常比例、高风险用户特征，并给出针对性建议。`;
+      
+      // 流式调用Ollama API
+      const contentEl = document.getElementById(`${aiMsgId}_content`);
+      let fullText = '';
+      
+      try {
+        await DifyAPI.chatMessageStream(adminPrompt, (token, full) => {
+          fullText = full;
+          // 实时渲染markdown
+          contentEl.innerHTML = renderMarkdown(fullText);
+          chat.scrollTop = chat.scrollHeight;
+        }, 'admin', 'admin_chat');
+      } catch (error) {
+        console.error('Admin AI error:', error);
+        contentEl.innerHTML = renderMarkdown('抱歉，AI服务暂时不可用。请确保Ollama已启动并下载了deepseek-r1模型。');
+      }
+      
+      // 最终渲染
+      if (fullText) {
+        contentEl.innerHTML = renderMarkdown(fullText);
+      }
+      
+      // 如果是血糖数据查询，在回复后生成趋势图表
+      if (needBloodSugar && window._bloodSugarTrend && window._bloodSugarTrend.dates.length > 0) {
+        const chartId = 'bsChart_' + Date.now();
+        const selectId = 'bsUserSelect_' + Date.now();
+        const trend = window._bloodSugarTrend;
+        const chartContainer = document.createElement('div');
+        chartContainer.style.cssText = 'margin-top:16px;padding:16px;background:#f8fafc;border-radius:8px';
+        
+        // 生成用户下拉选项
+        const userOptions = trend.allUserIds.map(uid => 
+          `<option value="${uid}" ${uid === trend.currentUserId ? 'selected' : ''}>用户${uid}</option>`
+        ).join('');
+        
+        chartContainer.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <div style="font-weight:600;color:#1e293b">📈 ${trend.period}血糖趋势图（用户<span id="${chartId}_currentUser">${trend.currentUserId}</span>）</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <label style="font-size:13px;color:#64748b">选择用户：</label>
+              <select id="${selectId}" style="padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;background:white;cursor:pointer">
+                ${userOptions}
+              </select>
+            </div>
+          </div>
+          <canvas id="${chartId}" height="200"></canvas>
+          <div id="${chartId}_stats" style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:13px;color:#64748b"></div>
+        `;
+        contentEl.appendChild(chartContainer);
+        chat.scrollTop = chat.scrollHeight;
+        
+        // 图表实例引用
+        let chartInstance = null;
+        
+        // 更新图表数据的函数
+        async function updateChart(userId) {
+          try {
+            // 更新标题中的用户ID
+            const currentUserEl = document.getElementById(`${chartId}_currentUser`);
+            if (currentUserEl) currentUserEl.textContent = userId;
+            
+            const trendRes = await fetch(`${API_BASE}/blood-sugar/trend?user_id=${userId}&days=${trend.days}`);
+            const trendData = await trendRes.json();
+            const rangeRes = await fetch(`${API_BASE}/blood-sugar/range?user_id=${userId}&days=${trend.days}`);
+            const rangeData = await rangeRes.json();
+            
+            if (trendData.data && chartInstance) {
+              chartInstance.data.labels = trendData.data.dates;
+              chartInstance.data.datasets[0].data = trendData.data.fasting;
+              chartInstance.data.datasets[1].data = trendData.data.postprandial;
+              chartInstance.update();
+            }
+            
+            // 更新统计信息
+            const statsEl = document.getElementById(`${chartId}_stats`);
+            if (statsEl && rangeData.data) {
+              const s = rangeData.data.stats;
+              statsEl.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
+                  <div>📊 记录数：<strong>${s.record_count}</strong> 条</div>
+                  <div>🔵 空腹平均：<strong>${s.fasting_avg}</strong> mmol/L</div>
+                  <div>🔴 餐后平均：<strong>${s.postprandial_avg}</strong> mmol/L</div>
+                  <div>📈 空腹范围：${s.fasting_min} ~ ${s.fasting_max}</div>
+                  <div>📈 餐后范围：${s.postprandial_min} ~ ${s.postprandial_max}</div>
+                </div>
+              `;
+            }
+          } catch (e) {
+            console.error('更新图表失败:', e);
+          }
+        }
+        
+        // 延迟初始化图表
+        setTimeout(() => {
+          const ctx = document.getElementById(chartId);
+          if (ctx && window.Chart) {
+            chartInstance = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: trend.dates,
+                datasets: [
+                  {
+                    label: '空腹血糖',
+                    data: trend.fasting,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59,130,246,0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 3
+                  },
+                  {
+                    label: '餐后血糖',
+                    data: trend.postprandial,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239,68,68,0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 3
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                  legend: { position: 'top' },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        return context.dataset.label + ': ' + context.parsed.y + ' mmol/L';
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    title: { display: true, text: '血糖 (mmol/L)' },
+                    min: 3,
+                    max: 15
+                  }
+                }
+              }
+            });
+            
+            // 初始化统计信息
+            updateChart(trend.currentUserId);
+            
+            // 绑定用户切换事件
+            const selectEl = document.getElementById(selectId);
+            if (selectEl) {
+              selectEl.addEventListener('change', function() {
+                updateChart(parseInt(this.value));
+              });
+            }
+          }
+        }, 100);
+      }
+      
       chat.scrollTop = chat.scrollHeight;
     }
   </script>

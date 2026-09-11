@@ -154,7 +154,7 @@
       const password = document.getElementById('loginPassword').value;
       
       try {
-        const response = await fetch('http://4342b9a6.r9.cpolar.top/api/login', {
+        const response = await fetch('http://localhost:5000/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -170,7 +170,7 @@
         }
       } catch (error) {
         console.error('Login error:', error);
-        Utils.toast('登录失败，请确保后端服务已启动（http://4342b9a6.r9.cpolar.top）', 'error');
+        Utils.toast('登录失败，请确保后端服务已启动（http://）', 'error');
       }
       return false;
     }
@@ -189,7 +189,7 @@
       }
       
       try {
-        const response = await fetch('http://4342b9a6.r9.cpolar.top/api/users', {
+        const response = await fetch('http://localhost:5000/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password, phone, role: 'user', status: 'active' })
